@@ -1,0 +1,1073 @@
+<title>Agenda de Alunos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: faixa de boas-vindas com resumo, abas com indicador deslizante, semana em grade de horários (lista por dia no celular), cada aluno com sua cor. */
+:root {
+  --bg: #eef1f6; --surface: #ffffff; --surface2: #e6eaf2; --fg: #101828; --muted: #5b6880; --line: #d8deea;
+  --ink: #101828; --ink-fg: #ffffff; --accent: #d93a1f; --accent-soft: #fde6e0;
+  --hero: #101c33; --hero-fg: #f2f5fb; --hero-muted: #a9b6cf; --hero-chip: rgba(255,255,255,.08); --hero-line: rgba(255,255,255,.14);
+  --ok-bg: #d9f1dc; --ok-fg: #006300; --warn-bg: #fdeccb; --warn-fg: #7a4a00; --bad-bg: #fbdcdc; --bad-fg: #a82727;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
+  --sink1: #ffffff; --sink2: #ffffff; --sink3: #ffffff; --sink4: #0b0b0b; --sink5: #ffffff; --sink6: #ffffff; --sink7: #ffffff; --sink8: #ffffff;
+  --bar-prev: #86b6ef; --bar-rec: #256abf;
+  --shadow: 0 1px 2px rgba(16,24,40,.06), 0 6px 20px rgba(16,24,40,.06);
+  --font-display: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1120; --surface: #121b2e; --surface2: #1a2640; --fg: #e8edf7; --muted: #93a1bb; --line: #263350;
+    --ink: #eef2fb; --ink-fg: #0d1526; --accent: #ff7b5c; --accent-soft: #3b1f1a;
+    --hero: #18264a; --hero-fg: #f2f5fb; --hero-muted: #a9b6cf; --hero-chip: rgba(255,255,255,.07); --hero-line: rgba(255,255,255,.12);
+    --ok-bg: #12351a; --ok-fg: #5fd078; --warn-bg: #3a2f10; --warn-fg: #f2b84b; --bad-bg: #431f1f; --bad-fg: #ff8d8d;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+    --sink4: #ffffff; --bar-prev: #1c5cab; --bar-rec: #5598e7;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1120; --surface: #121b2e; --surface2: #1a2640; --fg: #e8edf7; --muted: #93a1bb; --line: #263350;
+  --ink: #eef2fb; --ink-fg: #0d1526; --accent: #ff7b5c; --accent-soft: #3b1f1a;
+  --hero: #18264a; --hero-fg: #f2f5fb; --hero-muted: #a9b6cf; --hero-chip: rgba(255,255,255,.07); --hero-line: rgba(255,255,255,.12);
+  --ok-bg: #12351a; --ok-fg: #5fd078; --warn-bg: #3a2f10; --warn-fg: #f2b84b; --bad-bg: #431f1f; --bad-fg: #ff8d8d;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  --sink4: #ffffff; --bar-prev: #1c5cab; --bar-rec: #5598e7;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-block: 18px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.app { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; letter-spacing: -0.015em; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tnum { font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+@keyframes rise { from { opacity: .35; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes slideIn { from { transform: translateX(40px); opacity: .4; } to { transform: none; opacity: 1; } }
+@keyframes pop { from { transform: scale(.96); opacity: .4; } to { transform: none; opacity: 1; } }
+.view { animation: rise .28s ease both; }
+
+/* Barra do topo */
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+.brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+.logo { width: 38px; height: 38px; border-radius: 12px; background: var(--ink); color: var(--ink-fg); display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 20px; }
+.brand b { font-family: var(--font-display); font-size: 19px; letter-spacing: -0.01em; }
+.tabs { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); background: var(--surface); border: 1px solid var(--line); padding: 4px; border-radius: 14px; min-width: min(100%, 420px); flex: 0 1 460px; }
+.tab-ind { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 3); border-radius: 10px; background: var(--ink); transform: translateX(calc(var(--i) * 100%)); transition: transform .28s cubic-bezier(.3,.9,.3,1); }
+.tab { position: relative; z-index: 1; border: 0; background: transparent; padding: 9px 12px; border-radius: 10px; font-weight: 600; color: var(--muted); transition: color .2s; white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--ink-fg); }
+.tab:not([aria-selected="true"]):hover { color: var(--fg); }
+.theme { border: 1px solid var(--line); background: var(--surface); width: 42px; height: 42px; border-radius: 12px; font-size: 18px; display: grid; place-items: center; padding: 0; }
+.theme:hover { border-color: var(--accent); }
+
+/* Hero */
+.hero { background: var(--hero); color: var(--hero-fg); border-radius: 20px; padding: 22px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.6fr); gap: 20px; position: relative; overflow: hidden; }
+@media (max-width: 900px) { .hero { grid-template-columns: 1fr; } }
+.hero::after { content: "Hello"; position: absolute; right: -10px; bottom: -34px; font-family: var(--font-display); font-weight: 800; font-size: 150px; line-height: 1; letter-spacing: -0.04em; color: rgba(255,255,255,.04); pointer-events: none; }
+.hero h1 { font-size: clamp(28px, 4.2vw, 42px); line-height: 1.05; font-weight: 800; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero .pt { color: var(--hero-muted); margin-top: 8px; max-width: 38ch; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; position: relative; z-index: 1; }
+@media (max-width: 640px) { .stats { grid-template-columns: 1fr; } }
+.stat { text-align: left; border: 1px solid var(--hero-line); background: var(--hero-chip); color: inherit; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; transition: transform .18s, background .18s, border-color .18s; min-width: 0; }
+.stat:hover { transform: translateY(-2px); background: rgba(255,255,255,.13); border-color: rgba(255,255,255,.3); }
+.stat .k { font-size: 12px; text-transform: uppercase; letter-spacing: .09em; color: var(--hero-muted); }
+.stat .v { font-family: var(--font-display); font-size: 34px; font-weight: 800; line-height: 1.1; overflow-wrap: anywhere; }
+.stat .s { font-size: 13px; color: var(--hero-muted); overflow-wrap: anywhere; }
+.meter { height: 6px; border-radius: 99px; background: rgba(255,255,255,.14); margin-top: 6px; overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .5s ease; }
+
+/* Botões e campos */
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: 11px; font-weight: 600; min-height: 40px; transition: transform .12s, border-color .15s, background .15s; }
+.btn:hover { border-color: var(--fg); }
+.btn:active { transform: scale(.97); }
+.btn.primary { background: var(--ink); color: var(--ink-fg); border-color: var(--ink); }
+.btn.primary:hover { filter: brightness(1.15); }
+.btn.accent { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.danger { color: var(--bad-fg); border-color: var(--bad-fg); background: transparent; }
+.btn.small { padding: 4px 11px; min-height: 32px; font-size: 13px; }
+.btn.ghost { background: transparent; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.icon-btn { border: 1px solid var(--line); background: var(--surface); width: 40px; height: 40px; border-radius: 11px; font-size: 18px; line-height: 1; display: inline-grid; place-items: center; padding: 0; transition: border-color .15s, transform .12s; }
+.icon-btn:hover { border-color: var(--fg); }
+.icon-btn:active { transform: scale(.94); }
+.icon-btn.small { width: 30px; height: 30px; font-size: 16px; border-radius: 9px; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+.toolbar .grow { flex: 1 1 200px; min-width: 0; }
+.range { font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+.banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; background: var(--warn-bg); color: var(--warn-fg); padding: 10px 14px; border-radius: 12px; font-weight: 500; }
+.banner.bad { background: var(--bad-bg); color: var(--bad-fg); }
+.tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: var(--surface2); color: var(--muted); white-space: nowrap; letter-spacing: .02em; }
+.tag.warn { background: var(--warn-bg); color: var(--warn-fg); }
+.tag.ok { background: var(--ok-bg); color: var(--ok-fg); }
+.tag.bad { background: var(--bad-bg); color: var(--bad-fg); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 5px 12px; font-size: 13px; font-weight: 600; color: var(--muted); transition: all .15s; }
+.chip:hover { border-color: var(--fg); color: var(--fg); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--ink-fg); border-color: var(--ink); }
+
+.avatar { border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; flex: none; letter-spacing: .02em; }
+
+/* Semana: grade de horários */
+.tg { display: grid; grid-template-columns: 52px repeat(7, minmax(0, 1fr)); column-gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 10px 10px 14px; box-shadow: var(--shadow); }
+.tg-head { text-align: center; padding: 6px 0 10px; display: flex; flex-direction: column; align-items: center; gap: 0; }
+.dow { font-size: 12px; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); font-weight: 600; }
+.dnum { font-family: var(--font-display); font-size: 24px; font-weight: 800; line-height: 1.2; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; }
+.tg-head.today .dnum { background: var(--accent); color: #fff; }
+.tg-head.today .dow { color: var(--accent); }
+.tg-times { position: relative; }
+.tg-time { position: absolute; right: 6px; transform: translateY(-8px); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tg-col { position: relative; border-radius: 10px; background-image: linear-gradient(to bottom, var(--line) 1px, transparent 1px); background-size: 100% var(--row); cursor: cell; transition: background-color .15s; min-width: 0; }
+.tg-col:hover { background-color: color-mix(in srgb, var(--fg) 3%, transparent); }
+.tg-col.today { background-color: color-mix(in srgb, var(--accent) 5%, transparent); }
+.blk { position: absolute; border-radius: 10px; padding: 5px 8px; overflow: hidden; cursor: pointer; background: color-mix(in srgb, var(--c) 17%, var(--surface)); border-left: 4px solid var(--c); display: flex; flex-direction: column; gap: 0; transition: transform .15s, box-shadow .15s; min-width: 0; line-height: 1.25; }
+.blk:hover { transform: translateY(-1px) scale(1.015); box-shadow: 0 6px 18px rgba(0,0,0,.2); z-index: 5; }
+.blk[draggable="true"] { cursor: grab; }
+.blk-name { font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.blk-time { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.blk.tiny { flex-direction: row; align-items: center; gap: 6px; padding-block: 2px; }
+.blk.tiny .blk-time { order: -1; }
+.blk .tag { align-self: flex-start; margin-top: 2px; }
+.blk.reposicao, .blk.extra { border-left-style: solid; background-image: repeating-linear-gradient(135deg, color-mix(in srgb, var(--c) 14%, transparent) 0 6px, transparent 6px 12px); }
+.blk.cancelled { opacity: .62; background: var(--surface2); border-left-color: var(--bad-fg); }
+.blk.cancelled .blk-name { text-decoration: line-through; }
+.tg-hint { position: absolute; left: 3px; right: 3px; border: 2px dashed var(--accent); border-radius: 10px; background: var(--accent-soft); opacity: .8; pointer-events: none; z-index: 4; }
+.now { position: absolute; left: 0; right: 0; height: 2px; background: var(--accent); pointer-events: none; z-index: 6; }
+.now::before { content: ""; position: absolute; left: -4px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.tip { color: var(--muted); font-size: 13px; }
+
+/* Semana: celular */
+.daychips { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.dchip { border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 8px 0 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.dchip b { font-family: var(--font-display); font-size: 18px; }
+.dchip small { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.dchip[aria-pressed="true"] { background: var(--ink); color: var(--ink-fg); border-color: var(--ink); }
+.dchip[aria-pressed="true"] small { color: inherit; opacity: .75; }
+.dchip.today:not([aria-pressed="true"]) b { color: var(--accent); }
+.dots { display: flex; gap: 3px; height: 6px; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--c); }
+.dlist { display: flex; flex-direction: column; gap: 10px; }
+.lcard { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; text-align: left; border: 1px solid var(--line); border-left: 5px solid var(--c); background: var(--surface); border-radius: 14px; padding: 12px 14px; box-shadow: var(--shadow); }
+.lcard .t { font-family: var(--font-display); font-weight: 800; font-size: 19px; font-variant-numeric: tabular-nums; }
+.lcard.cancelled { opacity: .65; }
+.lcard.cancelled .n { text-decoration: line-through; }
+.lcard .n { font-weight: 600; overflow-wrap: anywhere; }
+.lcard .m { font-size: 13px; color: var(--muted); }
+
+/* Alunos */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+.scard { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 0; overflow: hidden; display: flex; flex-direction: column; min-width: 0; box-shadow: var(--shadow); transition: transform .18s, border-color .18s; animation: rise .3s ease both; }
+.scard:hover { transform: translateY(-3px); border-color: var(--c); }
+.scard .top { background: color-mix(in srgb, var(--c) 16%, var(--surface)); padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+.scard h3 { font-size: 18px; overflow-wrap: anywhere; }
+.scard .sub { font-size: 13px; color: var(--muted); }
+.scard .body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+.wk { display: flex; gap: 5px; }
+.wk span { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; font-size: 11px; font-weight: 700; background: var(--surface2); color: var(--muted); }
+.wk span.on { background: var(--c); color: var(--sinkc); }
+.srow { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.next { font-size: 13px; }
+.next b { font-weight: 600; }
+.clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--muted); font-size: 13px; }
+.search { min-width: 0; flex: 1 1 220px; max-width: 360px; }
+.empty { background: var(--surface); border: 2px dashed var(--line); border-radius: 20px; padding: 40px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.empty h2 { font-size: 24px; }
+.empty p { margin: 0; color: var(--muted); max-width: 48ch; }
+
+/* Recebimentos */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; box-shadow: var(--shadow); }
+.tile .k { font-size: 12px; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); font-weight: 600; }
+.tile .v { font-family: var(--font-display); font-size: 34px; font-weight: 800; line-height: 1.15; }
+.tile .meter { background: var(--surface2); }
+.tile .meter i { background: var(--bar-rec); }
+.panels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 900px) { .panels { grid-template-columns: 1fr; } }
+.panel-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.panel-card h3 { font-size: 18px; }
+.panel-card .hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+svg.chart { width: 100%; height: auto; display: block; overflow: visible; }
+svg.chart text { font-family: var(--font-body); fill: var(--muted); font-size: 11px; }
+svg.chart .val { fill: var(--fg); font-weight: 600; }
+.rank { display: flex; flex-direction: column; gap: 8px; }
+.rk { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 10px; align-items: center; border: 0; background: transparent; padding: 2px 0; text-align: left; }
+.rk .nm { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rk .tr { position: relative; height: 22px; display: flex; align-items: center; gap: 8px; }
+.rk .bar-fill { height: 22px; min-width: 4px; border-radius: 0 4px 4px 0; background: var(--c); transition: width .5s ease, filter .15s; }
+.rk:hover .bar-fill, .rk:focus-visible .bar-fill { filter: brightness(1.12) saturate(1.1); }
+.rk .vv { font-size: 12px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rk.dim { opacity: .5; }
+.prow { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.6fr) auto auto; gap: 12px 16px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 12px 16px; transition: border-color .15s, transform .15s; }
+.prow:hover { border-color: var(--c); }
+@media (max-width: 760px) { .prow { grid-template-columns: minmax(0, 1fr) auto; } .prow .det { grid-column: 1 / -1; order: 3; } }
+.prow .who { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.prow .nm { font-weight: 600; border: 0; background: transparent; padding: 0; text-align: left; overflow-wrap: anywhere; }
+.prow .nm:hover { text-decoration: underline; }
+.prow .det { font-size: 13px; color: var(--muted); }
+.prow .tot { font-family: var(--font-display); font-weight: 800; font-size: 20px; text-align: right; }
+.paybtn { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 6px 14px 6px 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; transition: all .15s; }
+.paybtn .dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: 12px; color: transparent; transition: all .2s; }
+.paybtn:hover { border-color: var(--fg); }
+.paybtn.on { background: var(--ok-bg); color: var(--ok-fg); border-color: transparent; }
+.paybtn.on .dot { background: var(--ok-fg); border-color: var(--ok-fg); color: var(--ok-bg); }
+.plist { display: flex; flex-direction: column; gap: 10px; }
+.note { color: var(--muted); font-size: 13px; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tbl th, .tbl td { text-align: right; padding: 7px 8px; border-bottom: 1px solid var(--line); }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl th { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+/* Janelas */
+.ov { position: fixed; inset: 0; background: rgba(6, 12, 24, .6); z-index: 20; display: flex; overflow-y: auto; animation: rise .15s ease both; }
+.ov.modal { align-items: flex-start; justify-content: center; padding: 24px max(12px, env(safe-area-inset-right, 0px)) 24px max(12px, env(safe-area-inset-left, 0px)); }
+.ov.drawer { justify-content: flex-end; }
+.panel { background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; }
+.panel.modal { border-radius: 18px; width: 100%; max-width: 520px; animation: pop .2s ease both; margin: auto 0; }
+.panel.drawer { width: min(680px, 100%); min-height: 100%; height: max-content; border-radius: 0; animation: slideIn .25s ease both; padding-right: env(safe-area-inset-right, 0px); }
+.ph { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.ph h2 { font-size: 20px; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.pb { padding: 18px 20px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
+.pf { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); position: sticky; bottom: 0; background: var(--surface); }
+.pf .right { display: flex; gap: 8px; flex-wrap: wrap; }
+.dtabs { display: flex; gap: 4px; padding: 10px 20px 0; border-bottom: 1px solid var(--line); overflow-x: auto; position: sticky; top: 0; background: var(--surface); z-index: 2; }
+.dtab { border: 0; background: transparent; padding: 10px 14px; font-weight: 600; color: var(--muted); border-bottom: 3px solid transparent; white-space: nowrap; }
+.dtab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+.form2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 520px) { .form2 { grid-template-columns: 1fr; } }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field.full { grid-column: 1 / -1; }
+.field > label, .lbl { font-size: 13px; font-weight: 600; color: var(--muted); }
+.ctl { width: 100%; min-width: 0; border: 1px solid var(--line); background: var(--bg); border-radius: 11px; padding: 8px 11px; min-height: 42px; transition: border-color .15s; }
+.ctl:hover { border-color: var(--muted); }
+textarea.ctl { resize: vertical; min-height: 84px; }
+.hint { font-size: 12px; color: var(--muted); }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.sw { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--line); padding: 0; transition: transform .12s; }
+.sw:hover { transform: scale(1.1); }
+.sw[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--fg); }
+.slots { display: flex; flex-direction: column; gap: 8px; }
+.slot { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+@media (max-width: 520px) { .slot { grid-template-columns: 1fr 1fr; } }
+.check { display: flex; align-items: center; gap: 8px; min-height: 42px; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.sect { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-top: 4px; }
+.evlist { display: flex; flex-direction: column; gap: 6px; }
+.ev { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--surface2); border-radius: 10px; padding: 7px 12px; font-size: 13px; flex-wrap: wrap; }
+.linkrow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.linkrow code { background: var(--surface2); padding: 4px 8px; border-radius: 8px; font-size: 13px; overflow-wrap: anywhere; user-select: all; }
+.kv { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 4px 12px; font-size: 14px; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; overflow-wrap: anywhere; }
+.foot { color: var(--muted); font-size: 12px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--ink-fg); padding: 10px 18px; border-radius: 12px; z-index: 40; max-width: calc(100% - 32px); font-weight: 500; animation: rise .2s ease both; box-shadow: var(--shadow); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+</style>
+
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script>
+(() => {
+  const { useState, useEffect, useMemo, useRef, useCallback } = React;
+  const h = React.createElement;
+  const T = (t) => (p, ...c) => h(t, p, ...c);
+  const div = T('div'), span = T('span'), button = T('button'), label = T('label'), input = T('input'),
+    select = T('select'), textarea = T('textarea'), option = T('option'), para = T('p'), h1 = T('h1'), h2 = T('h2'),
+    h3 = T('h3'), header = T('header'), svg = T('svg'), rect = T('rect'), line = T('line'), text = T('text'),
+    table = T('table'), thead = T('thead'), tbody = T('tbody'), tr = T('tr'), th = T('th'), td = T('td'),
+    g = T('g'), dl = T('dl'), dt = T('dt'), dd = T('dd'), code = T('code'), em = T('em'), b = T('b'), small = T('small'), i_ = T('i');
+
+  const COLS = ['alunos', 'eventos', 'pagamentos'];
+  const LS = 'agenda-de-alunos-v1';
+  const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+  const DIAS_CURTO = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const LETRAS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
+  const ORDEM = [1, 2, 3, 4, 5, 6, 0];
+  const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  const MES_CURTO = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  const NIVEIS = [['A1', 'Iniciante'], ['A2', 'Básico'], ['B1', 'Intermediário'], ['B2', 'Intermediário superior'], ['C1', 'Avançado'], ['C2', 'Proficiente']];
+  const DURACOES = [30, 45, 60, 75, 90, 120];
+  const FOCOS = ['Conversação', 'Gramática', 'Vocabulário', 'Pronúncia', 'Listening', 'Leitura', 'Escrita', 'Business English', 'Viagem', 'Entrevista de emprego', 'IELTS', 'TOEFL', 'Cambridge (FCE/CAE)', 'Inglês para crianças'];
+  const FORMAS = ['Pix', 'Dinheiro', 'Cartão', 'Transferência', 'Boleto'];
+  const TABS = [['semana', 'Semana'], ['alunos', 'Alunos'], ['recebimentos', 'Recebimentos']];
+  const ROW = 56;
+
+  const pad = (n) => String(n).padStart(2, '0');
+  const fmt = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const parse = (s) => { const a = s.split('-').map(Number); return new Date(a[0], a[1] - 1, a[2]); };
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const num = (v) => { const n = Number(String(v == null ? '' : v).replace(',', '.')); return isFinite(n) ? n : 0; };
+  const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  const moneyN = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
+  const mins = (t) => { const p = String(t || '0:0').split(':').map(Number); return (p[0] || 0) * 60 + (p[1] || 0); };
+  const hm = (m) => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
+  const shortDate = (s) => { const d = parse(s); return DIAS_CURTO[d.getDay()] + ', ' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1); };
+  const longDate = (d) => (d.getDay() === 0 || d.getDay() === 6 ? DIAS[d.getDay()] : DIAS[d.getDay()] + '-feira') + ', ' + d.getDate() + ' de ' + MESES[d.getMonth()];
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  const byName = (a, b) => (a.nome || '').localeCompare(b.nome || '', 'pt-BR');
+  const hash = (s) => { let x = 0; for (let k = 0; k < s.length; k++) x = (x * 31 + s.charCodeAt(k)) >>> 0; return x; };
+  const colorIdx = (a) => (a && Number.isInteger(a.cor) && a.cor >= 0 && a.cor < 8) ? a.cor : hash((a && a.id) || 'x') % 8;
+  const colorVar = (a) => 'var(--s' + (colorIdx(a) + 1) + ')';
+  const inkVar = (a) => 'var(--sink' + (colorIdx(a) + 1) + ')';
+  const initials = (n) => (n || '?').trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+  const idade = (s) => { if (!s) return null; const d = parse(s), n = new Date(); let a = n.getFullYear() - d.getFullYear(); if (n < new Date(n.getFullYear(), d.getMonth(), d.getDate())) a--; return a >= 0 && a < 120 ? a : null; };
+
+  const weekStart = (base) => { const d = new Date(base.getFullYear(), base.getMonth(), base.getDate()); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d; };
+  const cancelId = (alunoId, ds, hora) => 'c_' + alunoId + '_' + ds + '_' + String(hora).replace(':', '');
+
+  function lessonsOn(date, alunos, eventos) {
+    const ds = fmt(date), dow = date.getDay(), out = [];
+    alunos.filter((a) => a.ativo !== false).forEach((a) => {
+      (a.aulas || []).forEach((s, i) => {
+        if (Number(s.dia) === dow) {
+          const ev = eventos.find((e) => e.alunoId === a.id && e.data === ds && e.tipo === 'cancelada' && (!e.hora || e.hora === s.hora));
+          out.push({ key: a.id + '-' + i, aluno: a, hora: s.hora, dur: Number(s.dur) || 60, kind: 'regular', cancelada: !!ev, ev });
+        }
+      });
+    });
+    eventos.filter((e) => e.data === ds && (e.tipo === 'reposicao' || e.tipo === 'extra')).forEach((e) => {
+      const a = alunos.find((x) => x.id === e.alunoId);
+      if (a) out.push({ key: e.id, aluno: a, hora: e.hora || '00:00', dur: Number(e.dur) || 60, kind: e.tipo, ev: e, nota: e.nota });
+    });
+    return out.sort((x, y) => String(x.hora).localeCompare(String(y.hora)));
+  }
+
+  function layoutDay(items) {
+    const arr = items.map((l) => ({ l, s: mins(l.hora), e: mins(l.hora) + (l.dur || 60), lane: 0, lanes: 1 })).sort((a, c) => a.s - c.s || a.e - c.e);
+    const out = []; let cluster = [], clusterEnd = -1;
+    const flush = () => {
+      const lanes = [];
+      cluster.forEach((it) => { let k = 0; while (lanes[k] !== undefined && lanes[k] > it.s) k++; lanes[k] = it.e; it.lane = k; });
+      cluster.forEach((it) => { it.lanes = lanes.length; out.push(it); });
+      cluster = [];
+    };
+    arr.forEach((it) => { if (cluster.length && it.s >= clusterEnd) { flush(); clusterEnd = -1; } cluster.push(it); clusterEnd = Math.max(clusterEnd, it.e); });
+    if (cluster.length) flush();
+    return out;
+  }
+
+  function monthStats(a, ano, mes, eventos) {
+    const dias = new Date(ano, mes + 1, 0).getDate();
+    let regulares = 0, canceladas = 0;
+    for (let d = 1; d <= dias; d++) {
+      const dtt = new Date(ano, mes, d), ds = fmt(dtt), dow = dtt.getDay();
+      (a.aulas || []).forEach((s) => {
+        if (Number(s.dia) === dow) {
+          const c = eventos.some((e) => e.alunoId === a.id && e.data === ds && e.tipo === 'cancelada' && (!e.hora || e.hora === s.hora));
+          if (c) canceladas++; else regulares++;
+        }
+      });
+    }
+    const ym = ano + '-' + pad(mes + 1);
+    const evs = eventos.filter((e) => e.alunoId === a.id && e.data && e.data.slice(0, 7) === ym);
+    const repos = evs.filter((e) => e.tipo === 'reposicao').length, extras = evs.filter((e) => e.tipo === 'extra').length;
+    const cobrarC = !!a.cobrarCanceladas;
+    const aulas = regulares + (cobrarC ? canceladas + extras : repos + extras);
+    const total = a.cobranca === 'mensal' ? num(a.mensalidade) : aulas * num(a.valor);
+    return { regulares, canceladas, repos, extras, aulas, total, ym, cobrarC };
+  }
+
+  function computeMonth(alunos, eventos, pagamentos, ano, mes, now) {
+    const ym = ano + '-' + pad(mes + 1);
+    const rows = alunos.filter((a) => a.ativo !== false).sort(byName).map((a) => {
+      const st = monthStats(a, ano, mes, eventos);
+      const pid = a.id + '_' + ym;
+      const pag = pagamentos.find((p) => p.id === pid);
+      let atrasado = false;
+      if (!pag && st.total > 0 && a.vencimento) {
+        const cur = now.getFullYear() * 12 + now.getMonth(), tgt = ano * 12 + mes;
+        atrasado = tgt < cur || (tgt === cur && now.getDate() > Number(a.vencimento));
+      }
+      return { a, st, pid, pago: !!pag, atrasado, recebido: pag ? (pag.valor != null ? num(pag.valor) : st.total) : 0 };
+    });
+    const previsto = rows.reduce((t, r) => t + r.st.total, 0);
+    const recebido = rows.reduce((t, r) => t + r.recebido, 0);
+    const aulas = rows.reduce((t, r) => t + r.st.aulas, 0);
+    return { rows, previsto, recebido, aulas, ym };
+  }
+
+  function nextLessonOf(a, eventos, now) {
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    for (let k = 0; k < 21; k++) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + k);
+      const ls = lessonsOn(d, [a], eventos).filter((l) => !l.cancelada && (k > 0 || mins(l.hora) > nowMin));
+      if (ls.length) return { d, l: ls[0], k };
+    }
+    return null;
+  }
+  const relDay = (k, d) => k === 0 ? 'hoje' : k === 1 ? 'amanhã' : DIAS_CURTO[d.getDay()].toLowerCase() + ' ' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1);
+
+  /* ---------- Hooks ---------- */
+  const reduced = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+  function useNow() { const [n, setN] = useState(() => new Date()); useEffect(() => { const t = setInterval(() => setN(new Date()), 30000); return () => clearInterval(t); }, []); return n; }
+  function useWide() {
+    const q = '(min-width: 900px)';
+    const [w, setW] = useState(() => { try { return window.matchMedia(q).matches; } catch (e) { return true; } });
+    useEffect(() => { try { const m = window.matchMedia(q), f = () => setW(m.matches); m.addEventListener('change', f); return () => m.removeEventListener('change', f); } catch (e) {} }, []);
+    return w;
+  }
+  function useCount(target) {
+    const [v, setV] = useState(target), prev = useRef(target);
+    useEffect(() => {
+      const from = prev.current, to = target;
+      if (from === to) return;
+      if (reduced()) { setV(to); prev.current = to; return; }
+      let raf, t0;
+      const step = (t) => {
+        if (!t0) t0 = t;
+        const k = Math.min(1, (t - t0) / 650), e = 1 - Math.pow(1 - k, 3);
+        setV(from + (to - from) * e);
+        if (k < 1) raf = requestAnimationFrame(step); else prev.current = to;
+      };
+      raf = requestAnimationFrame(step);
+      return () => cancelAnimationFrame(raf);
+    }, [target]);
+    return v;
+  }
+
+  /* ---------- Armazenamento: nuvem (db) quando disponível, senão este navegador ---------- */
+  function useStore() {
+    const [data, setData] = useState({ alunos: [], eventos: [], pagamentos: [] });
+    const [status, setStatus] = useState('loading');
+    const [loaded, setLoaded] = useState(false);
+    const [slow, setSlow] = useState(false);
+    const dbRef = useRef(null);
+    useEffect(() => {
+      let dead = false; const unsubs = [];
+      const timer = setTimeout(() => setSlow(true), 10000);
+      const startLocal = () => {
+        const d = { alunos: [], eventos: [], pagamentos: [] };
+        try { const raw = localStorage.getItem(LS); if (raw) { const j = JSON.parse(raw); COLS.forEach((c) => { if (Array.isArray(j[c])) d[c] = j[c]; }); } } catch (e) {}
+        setData(d); setStatus('local'); setLoaded(true); clearTimeout(timer);
+      };
+      const pr = (window.claude && window.claude.use) ? window.claude.use('db') : Promise.resolve(null);
+      Promise.resolve(pr).then((db) => {
+        if (dead) return;
+        if (!db) { startLocal(); return; }
+        dbRef.current = db; setStatus('cloud');
+        const got = {};
+        COLS.forEach((c) => {
+          const u = db.collection(c).onSnapshot((snap) => {
+            const rows = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+            setData((prev) => { const n = Object.assign({}, prev); n[c] = rows; return n; });
+            if (!snap.metadata.fromCache || rows.length > 0) got[c] = true;
+            if (COLS.every((k) => got[k])) { setLoaded(true); setSlow(false); clearTimeout(timer); }
+          }, () => { setStatus('error'); setLoaded(true); clearTimeout(timer); });
+          unsubs.push(u);
+        });
+      }).catch(() => { if (!dead) startLocal(); });
+      return () => { dead = true; clearTimeout(timer); unsubs.forEach((u) => u()); };
+    }, []);
+    const persist = (n) => { try { localStorage.setItem(LS, JSON.stringify(n)); } catch (e) {} };
+    const save = useCallback((col, id, obj) => {
+      const db = dbRef.current;
+      if (db) return db.collection(col).doc(id).set(obj);
+      setData((prev) => { const n = Object.assign({}, prev); n[col] = prev[col].filter((r) => r.id !== id).concat([Object.assign({ id }, obj)]); persist(n); return n; });
+      return Promise.resolve();
+    }, []);
+    const remove = useCallback((col, id) => {
+      const db = dbRef.current;
+      if (db) return db.collection(col).doc(id).delete();
+      setData((prev) => { const n = Object.assign({}, prev); n[col] = prev[col].filter((r) => r.id !== id); persist(n); return n; });
+      return Promise.resolve();
+    }, []);
+    return { data, status, loaded, slow, save, remove };
+  }
+
+  /* ---------- Peças básicas ---------- */
+  function Avatar(p) {
+    const s = p.size || 40, a = p.a;
+    return div({ className: 'avatar', 'aria-hidden': 'true', style: { background: colorVar(a), color: inkVar(a), width: s, height: s, fontSize: Math.round(s * 0.4) } }, initials(a.nome));
+  }
+
+  function Overlay(p) {
+    const onClose = p.onClose;
+    useEffect(() => {
+      const k = (e) => { if (e.key === 'Escape') onClose(); };
+      window.addEventListener('keydown', k);
+      const prev = document.body.style.overflow; document.body.style.overflow = 'hidden';
+      return () => { window.removeEventListener('keydown', k); document.body.style.overflow = prev; };
+    }, [onClose]);
+    const v = p.variant || 'modal';
+    return div({ className: 'ov ' + v, onMouseDown: (e) => { if (e.target === e.currentTarget) onClose(); } },
+      div({ className: 'panel ' + v, role: 'dialog', 'aria-modal': 'true', 'aria-label': p.label }, p.children));
+  }
+
+  function Field(p) {
+    return div({ className: 'field' + (p.full ? ' full' : '') }, label({ htmlFor: p.id }, p.label), p.children, p.hint ? span({ className: 'hint' }, p.hint) : null);
+  }
+
+  function Hero(p) {
+    const { alunos, eventos, pagamentos, now } = p;
+    const hr = now.getHours();
+    const g = hr < 12 ? ['Good morning', 'Bom dia'] : hr < 18 ? ['Good afternoon', 'Boa tarde'] : ['Good evening', 'Boa noite'];
+    const nowMin = hr * 60 + now.getMinutes();
+    const today = lessonsOn(now, alunos, eventos).filter((l) => !l.cancelada);
+    const andamento = today.find((l) => mins(l.hora) <= nowMin && nowMin < mins(l.hora) + l.dur);
+    const prox = today.find((l) => mins(l.hora) > nowMin);
+    const ws = weekStart(now); let semana = 0;
+    for (let k = 0; k < 7; k++) semana += lessonsOn(new Date(ws.getFullYear(), ws.getMonth(), ws.getDate() + k), alunos, eventos).filter((l) => !l.cancelada).length;
+    const mo = computeMonth(alunos, eventos, pagamentos, now.getFullYear(), now.getMonth(), now);
+    const aReceber = Math.max(0, mo.previsto - mo.recebido);
+    const cnt = useCount(aReceber);
+    const pct = mo.previsto > 0 ? Math.min(100, Math.round(mo.recebido / mo.previsto * 100)) : 0;
+    const sub = andamento ? 'Em andamento: ' + andamento.aluno.nome : prox ? 'Próxima às ' + prox.hora + ' · ' + prox.aluno.nome : today.length ? 'Aulas de hoje já terminaram' : 'Dia livre';
+    return div({ className: 'hero' },
+      div({ style: { position: 'relative', zIndex: 1 } },
+        h1(null, g[0] + ', ', em(null, 'teacher'), '.'),
+        div({ className: 'pt' }, g[1] + '! ' + (alunos.length === 0 ? 'Cadastre seu primeiro aluno para montar a agenda.' : today.length === 0 ? 'Você não tem aulas hoje.' : 'Hoje você tem ' + today.length + (today.length === 1 ? ' aula.' : ' aulas.')))),
+      div({ className: 'stats' },
+        button({ className: 'stat', onClick: () => p.goTab('semana') }, div({ className: 'k' }, 'Hoje'), div({ className: 'v' }, today.length), div({ className: 's' }, sub)),
+        button({ className: 'stat', onClick: () => p.goTab('semana') }, div({ className: 'k' }, 'Esta semana'), div({ className: 'v' }, semana), div({ className: 's' }, semana === 1 ? 'aula marcada' : 'aulas marcadas')),
+        button({ className: 'stat', onClick: () => p.goTab('recebimentos') }, div({ className: 'k' }, 'A receber em ' + MESES[now.getMonth()]), div({ className: 'v tnum' }, money.format(cnt)),
+          div({ className: 'meter', role: 'img', 'aria-label': pct + '% do previsto já recebido' }, i_({ style: { width: pct + '%' } })),
+          div({ className: 's' }, pct + '% de ' + money.format(mo.previsto) + ' já recebido'))));
+  }
+
+  /* ---------- Semana ---------- */
+  function WeekGrid(p) {
+    const { days, cols, now } = p;
+    const dragRef = useRef(null);
+    const [hint, setHint] = useState(null);
+    let minM = 8 * 60, maxM = 21 * 60;
+    cols.forEach((ls) => ls.forEach((l) => { const s = mins(l.hora); minM = Math.min(minM, Math.floor(s / 60) * 60); maxM = Math.max(maxM, Math.ceil((s + l.dur) / 60) * 60); }));
+    const H = (maxM - minM) / 60 * ROW;
+    const todayStr = fmt(now), nowMin = now.getHours() * 60 + now.getMinutes();
+    const hours = []; for (let m = minM; m < maxM; m += 60) hours.push(m);
+    const slotFrom = (e) => {
+      const r = e.currentTarget.getBoundingClientRect(), y = e.clientY - r.top;
+      const m = minM + Math.round((y / ROW * 60) / 30) * 30;
+      return Math.max(minM, Math.min(maxM - 30, m));
+    };
+    return div({ className: 'tg', style: { '--row': ROW + 'px' } },
+      div({ className: 'tg-corner' }),
+      days.map((d) => div({ key: 'h' + fmt(d), className: 'tg-head' + (fmt(d) === todayStr ? ' today' : '') }, span({ className: 'dow' }, DIAS_CURTO[d.getDay()]), span({ className: 'dnum tnum' }, d.getDate()))),
+      div({ className: 'tg-times', style: { height: H } }, hours.map((m) => div({ key: m, className: 'tg-time', style: { top: (m - minM) / 60 * ROW } }, hm(m)))),
+      days.map((d, i) => {
+        const items = layoutDay(cols[i]), isToday = fmt(d) === todayStr;
+        return div({
+          key: fmt(d), className: 'tg-col' + (isToday ? ' today' : ''), style: { height: H }, title: 'Clique em um horário vazio para marcar uma aula',
+          onClick: (e) => { if (e.target !== e.currentTarget) return; p.onSlot(d, hm(slotFrom(e))); },
+          onDragOver: (e) => { if (!dragRef.current) return; e.preventDefault(); const m = slotFrom(e); setHint((pv) => pv && pv.i === i && pv.m === m ? pv : { i, m, dur: dragRef.current.l.dur }); },
+          onDragLeave: (e) => { if (e.currentTarget === e.target) setHint(null); },
+          onDrop: (e) => { e.preventDefault(); const dr = dragRef.current; dragRef.current = null; const m = slotFrom(e); setHint(null); if (dr) p.onMove(dr.l, dr.from, d, hm(m)); }
+        },
+          hint && hint.i === i ? div({ className: 'tg-hint', style: { top: (hint.m - minM) / 60 * ROW, height: Math.max(24, hint.dur / 60 * ROW) } }) : null,
+          items.map((it) => {
+            const l = it.l, height = Math.max(24, (it.e - it.s) / 60 * ROW - 3);
+            const canDrag = l.kind === 'regular' && !l.cancelada;
+            return div({
+              key: l.key, role: 'button', tabIndex: 0, draggable: canDrag,
+              'aria-label': l.aluno.nome + ', ' + l.hora + (l.cancelada ? ', cancelada' : ''),
+              className: 'blk ' + l.kind + (l.cancelada ? ' cancelled' : '') + (height < 46 ? ' tiny' : ''),
+              style: { '--c': colorVar(l.aluno), top: (it.s - minM) / 60 * ROW + 1, height, left: 'calc(' + (it.lane / it.lanes * 100) + '% + 2px)', width: 'calc(' + (100 / it.lanes) + '% - 4px)' },
+              onClick: (e) => { e.stopPropagation(); p.onOpen(l, d); },
+              onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); p.onOpen(l, d); } },
+              onDragStart: (e) => { dragRef.current = { l, from: d }; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', l.key); } catch (x) {} },
+              onDragEnd: () => { dragRef.current = null; setHint(null); }
+            },
+              div({ className: 'blk-name' }, l.aluno.nome),
+              div({ className: 'blk-time' }, l.hora + '–' + hm(it.e)),
+              height >= 46 && (l.kind !== 'regular' || l.cancelada) ? span({ className: 'tag ' + (l.cancelada ? 'bad' : l.kind === 'extra' ? 'ok' : 'warn') }, l.cancelada ? 'Cancelada' : l.kind === 'extra' ? 'Extra' : 'Reposição') : null);
+          }),
+          isToday && nowMin >= minM && nowMin <= maxM ? div({ className: 'now', style: { top: (nowMin - minM) / 60 * ROW } }) : null);
+      }));
+  }
+
+  function DayList(p) {
+    const { days, cols, now } = p;
+    const todayStr = fmt(now);
+    const [sel, setSel] = useState(() => { const k = days.findIndex((d) => fmt(d) === todayStr); return k >= 0 ? k : 0; });
+    useEffect(() => { const k = days.findIndex((d) => fmt(d) === todayStr); setSel(k >= 0 ? k : 0); }, [fmt(days[0])]);
+    const d = days[sel], ls = cols[sel];
+    return div({ style: { display: 'flex', flexDirection: 'column', gap: '14px' } },
+      div({ className: 'daychips' }, days.map((dd_, k) => button({
+        key: fmt(dd_), className: 'dchip' + (fmt(dd_) === todayStr ? ' today' : ''), 'aria-pressed': sel === k, onClick: () => setSel(k), 'aria-label': longDate(dd_)
+      }, small(null, DIAS_CURTO[dd_.getDay()]), b(null, dd_.getDate()),
+        div({ className: 'dots' }, cols[k].slice(0, 4).map((l) => i_({ key: l.key, style: { '--c': colorVar(l.aluno) } })))))),
+      div({ className: 'range', style: { fontSize: '18px' } }, cap(longDate(d))),
+      ls.length === 0 ? div({ className: 'empty', style: { padding: '24px' } }, para(null, 'Sem aulas neste dia.')) :
+        div({ className: 'dlist' }, ls.map((l) => button({ key: l.key, className: 'lcard' + (l.cancelada ? ' cancelled' : ''), style: { '--c': colorVar(l.aluno) }, onClick: () => p.onOpen(l, d) },
+          div({ className: 't' }, l.hora),
+          div({ style: { minWidth: 0 } }, div({ className: 'n' }, l.aluno.nome), div({ className: 'm' }, l.dur + ' min' + (l.aluno.modalidade ? ' · ' + l.aluno.modalidade : '') + (l.aluno.nivel ? ' · ' + l.aluno.nivel : ''))),
+          l.cancelada ? span({ className: 'tag bad' }, 'Cancelada') : l.kind === 'reposicao' ? span({ className: 'tag warn' }, 'Reposição') : l.kind === 'extra' ? span({ className: 'tag ok' }, 'Extra') : null))),
+      button({ className: 'btn', onClick: () => p.onSlot(d, '14:00') }, '+ Marcar aula neste dia'));
+  }
+
+  function SemanaView(p) {
+    const { alunos, eventos, now } = p;
+    const wide = useWide();
+    const [base, setBase] = useState(new Date());
+    const start = useMemo(() => weekStart(base), [base]);
+    const days = [0, 1, 2, 3, 4, 5, 6].map((k) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + k));
+    const cols = days.map((d) => lessonsOn(d, alunos, eventos));
+    const total = cols.reduce((t, ls) => t + ls.filter((l) => !l.cancelada).length, 0);
+    const end = days[6];
+    const rangeTxt = start.getMonth() === end.getMonth()
+      ? start.getDate() + ' a ' + end.getDate() + ' de ' + MESES[end.getMonth()]
+      : start.getDate() + ' de ' + MES_CURTO[start.getMonth()] + ' a ' + end.getDate() + ' de ' + MES_CURTO[end.getMonth()];
+    const shift = (n) => setBase(new Date(start.getFullYear(), start.getMonth(), start.getDate() + n * 7));
+    return div({ style: { display: 'flex', flexDirection: 'column', gap: '14px' } },
+      div({ className: 'toolbar' },
+        button({ className: 'icon-btn', onClick: () => shift(-1), 'aria-label': 'Semana anterior' }, '‹'),
+        button({ className: 'icon-btn', onClick: () => shift(1), 'aria-label': 'Próxima semana' }, '›'),
+        button({ className: 'btn', onClick: () => setBase(new Date()) }, 'Hoje'),
+        div({ className: 'grow' }, div({ className: 'range' }, rangeTxt + ' de ' + end.getFullYear()), span({ className: 'muted tnum' }, total + (total === 1 ? ' aula' : ' aulas') + ' nesta semana')),
+        button({ className: 'btn primary', onClick: () => p.onSlot(null, null) }, '+ Marcar aula')),
+      wide ? h(WeekGrid, { days, cols, now, onOpen: p.onOpen, onSlot: p.onSlot, onMove: p.onMove }) : h(DayList, { days, cols, now, onOpen: p.onOpen, onSlot: p.onSlot }),
+      wide ? div({ className: 'tip' }, 'Dica: clique em um horário vazio para marcar uma aula e arraste uma aula para outro dia ou horário para remarcar.') : null);
+  }
+
+  /* ---------- Alunos ---------- */
+  function AlunosView(p) {
+    const [q, setQ] = useState('');
+    const [st, setSt] = useState('ativos');
+    const [nv, setNv] = useState('');
+    const niveisUsados = NIVEIS.filter((n) => p.alunos.some((a) => a.nivel === n[0]));
+    const list = p.alunos.filter((a) => {
+      if (st === 'ativos' && a.ativo === false) return false;
+      if (st === 'inativos' && a.ativo !== false) return false;
+      if (nv && a.nivel !== nv) return false;
+      return !q || (a.nome || '').toLowerCase().includes(q.toLowerCase());
+    }).sort(byName);
+    const nInativos = p.alunos.filter((a) => a.ativo === false).length;
+    return div({ style: { display: 'flex', flexDirection: 'column', gap: '14px' } },
+      div({ className: 'toolbar' },
+        input({ className: 'ctl search', type: 'search', placeholder: 'Buscar aluno pelo nome', value: q, 'aria-label': 'Buscar aluno', onChange: (e) => setQ(e.target.value) }),
+        div({ className: 'chips' },
+          [['ativos', 'Ativos'], ['todos', 'Todos']].concat(nInativos ? [['inativos', 'Inativos (' + nInativos + ')']] : []).map((x) => button({ key: x[0], className: 'chip', 'aria-pressed': st === x[0], onClick: () => setSt(x[0]) }, x[1]))),
+        div({ className: 'grow' }),
+        button({ className: 'btn primary', onClick: p.onNew }, '+ Novo aluno')),
+      niveisUsados.length > 1 ? div({ className: 'chips' },
+        button({ className: 'chip', 'aria-pressed': nv === '', onClick: () => setNv('') }, 'Todos os níveis'),
+        niveisUsados.map((n) => button({ key: n[0], className: 'chip', 'aria-pressed': nv === n[0], onClick: () => setNv(n[0]) }, n[0] + ' · ' + n[1]))) : null,
+      list.length === 0
+        ? div({ className: 'empty' }, h2(null, q || nv ? 'Nenhum aluno encontrado' : 'Nenhum aluno aqui'), para(null, q || nv ? 'Confira a busca ou os filtros.' : 'Cadastre um aluno para montar a agenda e as contas do mês.'))
+        : div({ className: 'cards' }, list.map((a, idx) => {
+          const dias = (a.aulas || []).map((x) => Number(x.dia));
+          const nx = a.ativo !== false ? nextLessonOf(a, p.eventos, p.now) : null;
+          return button({ key: a.id, className: 'scard', style: { '--c': colorVar(a), '--sinkc': inkVar(a), animationDelay: Math.min(idx, 8) * 30 + 'ms' }, onClick: () => p.onOpen(a.id) },
+            div({ className: 'top' }, h(Avatar, { a, size: 46 }),
+              div({ style: { minWidth: 0, flex: 1 } }, h3(null, a.nome), div({ className: 'sub' }, [a.modalidade, a.formato].filter(Boolean).join(' · ') || 'Aluno')),
+              span({ className: 'tag' }, a.nivel || '—')),
+            div({ className: 'body' },
+              div({ className: 'wk', 'aria-label': 'Dias de aula' }, ORDEM.map((d, k) => span({ key: d, className: dias.includes(d) ? 'on' : '', title: DIAS[d] }, LETRAS[k]))),
+              div({ className: 'next' }, a.ativo === false ? span({ className: 'tag' }, 'Inativo') : nx ? [span({ key: 'a', className: 'muted' }, 'Próxima aula: '), b({ key: 'b' }, relDay(nx.k, nx.d) + ' às ' + nx.l.hora)] : span({ className: 'muted' }, 'Sem aula marcada')),
+              a.material ? div({ className: 'clamp' }, 'Material: ' + a.material) : null,
+              div({ className: 'srow' }, b({ className: 'tnum' }, a.cobranca === 'mensal' ? money.format(num(a.mensalidade)) + ' / mês' : money.format(num(a.valor)) + ' / aula'), a.exemplo ? span({ className: 'tag warn' }, 'Exemplo') : null)));
+        })));
+  }
+
+  /* ---------- Recebimentos ---------- */
+  function niceMax(v) {
+    if (v <= 0) return 400;
+    const raw = v / 4, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= raw);
+    return step * 4;
+  }
+
+  function BarsChart(p) {
+    const { data, sel, onPick } = p;
+    const [hov, setHov] = useState(null);
+    const W = 560, Ht = 230, L = 52, R = 8, Tp = 16, B = 30, pw = W - L - R, ph = Ht - Tp - B;
+    const top = niceMax(Math.max.apply(null, data.map((d) => Math.max(d.previsto, d.recebido))));
+    const y = (v) => Tp + ph - v / top * ph;
+    const gw = pw / data.length, bw = 20;
+    const ticks = [0, 1, 2, 3, 4].map((k) => top / 4 * k);
+    const active = hov != null ? hov : null;
+    return div({ style: { position: 'relative' } },
+      svg({ className: 'chart', viewBox: '0 0 ' + W + ' ' + Ht, role: 'img', 'aria-label': 'Previsto e recebido nos últimos seis meses' },
+        ticks.map((t) => [line({ key: 'g' + t, x1: L, x2: W - R, y1: y(t), y2: y(t), stroke: 'var(--line)', strokeWidth: 1 }), text({ key: 't' + t, x: L - 8, y: y(t) + 4, textAnchor: 'end' }, moneyN.format(t))]),
+        data.map((d, k) => {
+          const cx = L + gw * k + gw / 2, isSel = d.key === sel, isHov = active === k;
+          return g({ key: d.key, onMouseEnter: () => setHov(k), onMouseLeave: () => setHov(null), onClick: () => onPick(d), style: { cursor: 'pointer' }, tabIndex: 0, role: 'button', 'aria-label': cap(MESES[d.mes]) + ': previsto ' + money.format(d.previsto) + ', recebido ' + money.format(d.recebido), onFocus: () => setHov(k), onBlur: () => setHov(null), onKeyDown: (e) => { if (e.key === 'Enter') onPick(d); } },
+            rect({ x: cx - gw / 2 + 4, y: Tp, width: gw - 8, height: ph, rx: 8, fill: isSel || isHov ? 'var(--surface2)' : 'transparent' }),
+            rect({ x: cx - bw - 1, y: y(d.previsto), width: bw, height: Math.max(0, Tp + ph - y(d.previsto)), rx: 4, fill: 'var(--bar-prev)' }),
+            rect({ x: cx - bw - 1, y: Tp + ph - 4, width: bw, height: 4, fill: 'var(--bar-prev)' }),
+            rect({ x: cx + 1, y: y(d.recebido), width: bw, height: Math.max(0, Tp + ph - y(d.recebido)), rx: 4, fill: 'var(--bar-rec)' }),
+            rect({ x: cx + 1, y: Tp + ph - 4, width: bw, height: d.recebido > 0 ? 4 : 0, fill: 'var(--bar-rec)' }),
+            text({ x: cx, y: Ht - 8, textAnchor: 'middle', style: isSel ? { fill: 'var(--fg)', fontWeight: 700 } : null }, MES_CURTO[d.mes]));
+        }),
+        line({ x1: L, x2: W - R, y1: Tp + ph, y2: Tp + ph, stroke: 'var(--line)', strokeWidth: 1.5 }),
+        active != null ? (() => {
+          const d = data[active], cx = L + gw * active + gw / 2, tw = 150, tx = Math.max(L, Math.min(W - R - tw, cx - tw / 2));
+          return g({ key: 'tip', style: { pointerEvents: 'none' } },
+            rect({ x: tx, y: 2, width: tw, height: 44, rx: 8, fill: 'var(--ink)' }),
+            text({ x: tx + 10, y: 18, style: { fill: 'var(--ink-fg)', fontWeight: 700, fontSize: 11 } }, cap(MESES[d.mes]) + ' de ' + d.ano),
+            text({ x: tx + 10, y: 32, style: { fill: 'var(--ink-fg)', fontSize: 11 } }, 'Previsto ' + money.format(d.previsto)),
+            text({ x: tx + 10, y: 42, style: { fill: 'var(--ink-fg)', fontSize: 11, opacity: .8 } }, 'Recebido ' + money.format(d.recebido)));
+        })() : null),
+      div({ className: 'legend' }, span(null, i_({ style: { background: 'var(--bar-prev)' } }), 'Previsto'), span(null, i_({ style: { background: 'var(--bar-rec)' } }), 'Recebido')));
+  }
+
+  function RankBars(p) {
+    const rows = p.rows.filter((r) => r.st.total > 0).sort((a, c) => c.st.total - a.st.total);
+    const max = rows.length ? rows[0].st.total : 1;
+    const [hov, setHov] = useState(null);
+    if (!rows.length) return para({ className: 'note' }, 'Nenhum valor neste mês ainda.');
+    return div({ className: 'rank' }, rows.map((r) => button({
+      key: r.a.id, className: 'rk' + (hov && hov !== r.a.id ? ' dim' : ''), style: { '--c': colorVar(r.a) },
+      onMouseEnter: () => setHov(r.a.id), onMouseLeave: () => setHov(null), onFocus: () => setHov(r.a.id), onBlur: () => setHov(null), onClick: () => p.onOpen(r.a.id),
+      'aria-label': r.a.nome + ': ' + money.format(r.st.total)
+    }, div({ className: 'nm' }, r.a.nome), div({ className: 'tr' }, div({ className: 'bar-fill', style: { width: 'calc(' + (r.st.total / max * 100) + '% - 70px)' } }), span({ className: 'vv' }, money.format(r.st.total))))));
+  }
+
+  function RecebimentosView(p) {
+    const { now } = p;
+    const [ref, setRef] = useState({ ano: now.getFullYear(), mes: now.getMonth() });
+    const [tabela, setTabela] = useState(false);
+    const shift = (n) => { const d = new Date(ref.ano, ref.mes + n, 1); setRef({ ano: d.getFullYear(), mes: d.getMonth() }); };
+    const mo = computeMonth(p.alunos, p.eventos, p.pagamentos, ref.ano, ref.mes, now);
+    const hist = [5, 4, 3, 2, 1, 0].map((k) => {
+      const d = new Date(ref.ano, ref.mes - k, 1), m = computeMonth(p.alunos, p.eventos, p.pagamentos, d.getFullYear(), d.getMonth(), now);
+      return { key: m.ym, ano: d.getFullYear(), mes: d.getMonth(), previsto: m.previsto, recebido: m.recebido };
+    });
+    const aReceber = Math.max(0, mo.previsto - mo.recebido);
+    const cPrev = useCount(mo.previsto), cRec = useCount(mo.recebido), cAr = useCount(aReceber);
+    const pct = mo.previsto > 0 ? Math.min(100, Math.round(mo.recebido / mo.previsto * 100)) : 0;
+    return div({ style: { display: 'flex', flexDirection: 'column', gap: '14px' } },
+      div({ className: 'toolbar' },
+        button({ className: 'icon-btn', onClick: () => shift(-1), 'aria-label': 'Mês anterior' }, '‹'),
+        button({ className: 'icon-btn', onClick: () => shift(1), 'aria-label': 'Próximo mês' }, '›'),
+        button({ className: 'btn', onClick: () => setRef({ ano: now.getFullYear(), mes: now.getMonth() }) }, 'Este mês'),
+        div({ className: 'range' }, cap(MESES[ref.mes]) + ' de ' + ref.ano)),
+      div({ className: 'tiles' },
+        div({ className: 'tile' }, div({ className: 'k' }, 'Previsto no mês'), div({ className: 'v tnum' }, money.format(cPrev)), div({ className: 'note' }, mo.aulas + (mo.aulas === 1 ? ' aula' : ' aulas') + ' no mês')),
+        div({ className: 'tile' }, div({ className: 'k' }, 'Já recebido'), div({ className: 'v tnum' }, money.format(cRec)), div({ className: 'meter', role: 'img', 'aria-label': pct + '% recebido' }, i_({ style: { width: pct + '%' } }))),
+        div({ className: 'tile' }, div({ className: 'k' }, 'A receber'), div({ className: 'v tnum' }, money.format(cAr)), div({ className: 'note' }, pct + '% do previsto já foi pago'))),
+      div({ className: 'panels' },
+        div({ className: 'panel-card' }, div({ className: 'hd' }, h3(null, 'Últimos 6 meses'), button({ className: 'btn small ghost', onClick: () => setTabela(!tabela) }, tabela ? 'Ver gráfico' : 'Ver como tabela')),
+          tabela
+            ? table({ className: 'tbl' }, thead(null, tr(null, th(null, 'Mês'), th(null, 'Previsto'), th(null, 'Recebido'))), tbody(null, hist.map((d) => tr({ key: d.key }, td(null, cap(MESES[d.mes]) + ' ' + d.ano), td({ className: 'tnum' }, money.format(d.previsto)), td({ className: 'tnum' }, money.format(d.recebido))))))
+            : h(BarsChart, { data: hist, sel: mo.ym, onPick: (d) => setRef({ ano: d.ano, mes: d.mes }) }),
+          para({ className: 'note', style: { margin: 0 } }, 'Os meses anteriores usam os horários e valores atuais de cada aluno.')),
+        div({ className: 'panel-card' }, h3(null, 'Quanto cada aluno rende'), h(RankBars, { rows: mo.rows, onOpen: p.onOpen }))),
+      mo.rows.length === 0
+        ? div({ className: 'empty' }, h2(null, 'Sem alunos ativos'), para(null, 'Cadastre alunos com o valor da aula e as contas do mês aparecem aqui.'))
+        : div({ className: 'plist' }, mo.rows.map((r) => {
+          let det = r.st.aulas + (r.st.aulas === 1 ? ' aula' : ' aulas');
+          if (r.st.repos + r.st.extras) det += ' (' + (r.st.repos + r.st.extras) + ' reposição/extra)';
+          if (r.st.canceladas) det += ' · ' + r.st.canceladas + (r.st.canceladas === 1 ? ' cancelada' : ' canceladas') + (r.st.cobrarC ? ' (cobrada)' : '');
+          const cobr = r.a.cobranca === 'mensal' ? 'Mensalidade' : money.format(num(r.a.valor)) + ' por aula';
+          return div({ key: r.a.id, className: 'prow', style: { '--c': colorVar(r.a) } },
+            div({ className: 'who' }, h(Avatar, { a: r.a, size: 40 }), div({ style: { minWidth: 0 } }, button({ className: 'nm', onClick: () => p.onOpen(r.a.id) }, r.a.nome),
+              div({ className: 'note' }, cobr + (r.a.vencimento ? ' · vence dia ' + r.a.vencimento : '') + (r.a.forma ? ' · ' + r.a.forma : '')))),
+            div({ className: 'det' }, det, r.atrasado ? span({ className: 'tag bad', style: { marginLeft: '8px' } }, 'Atrasado') : null),
+            div({ className: 'tot tnum' }, money.format(r.st.total)),
+            button({ className: 'paybtn' + (r.pago ? ' on' : ''), 'aria-pressed': r.pago, onClick: () => p.onTogglePago(r) }, span({ className: 'dot' }, '✓'), r.pago ? 'Pago' : 'Marcar pago'));
+        })),
+      para({ className: 'note', style: { margin: 0 } }, 'Aulas canceladas não entram na conta, a menos que você marque “cobrar aulas canceladas” no cadastro do aluno. Reposições e extras entram no mês em que acontecem.'));
+  }
+
+  /* ---------- Detalhe da aula ---------- */
+  function LessonSheet(p) {
+    const { l, d } = p, a = l.aluno;
+    const ds = fmt(d), fim = hm(mins(l.hora) + l.dur);
+    const isLink = /^https?:\/\//i.test(a.local || '');
+    const copiar = () => { try { navigator.clipboard.writeText(a.local).then(() => p.notify('Link copiado'), () => p.notify('Não consegui copiar. Selecione o texto e copie.')); } catch (e) { p.notify('Não consegui copiar. Selecione o texto e copie.'); } };
+    return h(Overlay, { onClose: p.onClose, label: 'Aula de ' + a.nome },
+      div({ className: 'ph' }, h(Avatar, { a, size: 44 }), h2(null, a.nome), button({ className: 'icon-btn', onClick: p.onClose, 'aria-label': 'Fechar' }, '×')),
+      div({ className: 'pb' },
+        div({ className: 'chips' }, l.cancelada ? span({ className: 'tag bad' }, 'Cancelada') : l.kind === 'reposicao' ? span({ className: 'tag warn' }, 'Reposição') : l.kind === 'extra' ? span({ className: 'tag ok' }, 'Aula extra') : span({ className: 'tag' }, 'Aula fixa'), a.nivel ? span({ className: 'tag' }, a.nivel) : null),
+        dl({ className: 'kv' },
+          dt(null, 'Quando'), dd({ className: 'tnum' }, cap(longDate(d)) + ', ' + l.hora + ' às ' + fim + ' (' + l.dur + ' min)'),
+          a.modalidade ? [dt({ key: 'm1' }, 'Modalidade'), dd({ key: 'm2' }, [a.modalidade, a.formato].filter(Boolean).join(' · '))] : null,
+          a.local ? [dt({ key: 'l1' }, 'Local / link'), dd({ key: 'l2' }, div({ className: 'linkrow' }, code(null, a.local), button({ className: 'btn small', onClick: copiar }, 'Copiar'), isLink ? h('a', { href: a.local, target: '_blank', rel: 'noopener noreferrer', className: 'btn small', style: { textDecoration: 'none', display: 'inline-flex', alignItems: 'center' } }, 'Abrir') : null))] : null,
+          a.material ? [dt({ key: 'a1' }, 'Material'), dd({ key: 'a2' }, a.material + (a.unidade ? ' — ' + a.unidade : ''))] : null,
+          a.licao ? [dt({ key: 'h1' }, 'Lição de casa'), dd({ key: 'h2' }, a.licao)] : null,
+          l.nota ? [dt({ key: 'n1' }, 'Observação'), dd({ key: 'n2' }, l.nota)] : null)),
+      div({ className: 'pf' },
+        button({ className: 'btn', onClick: () => p.onFicha(a.id) }, 'Abrir ficha do aluno'),
+        div({ className: 'right' },
+          l.kind === 'regular' && !l.cancelada ? button({ className: 'btn', onClick: () => p.onRemarcar(l, d) }, 'Remarcar') : null,
+          l.kind === 'regular' && l.cancelada ? button({ className: 'btn', onClick: () => p.onRemarcar(l, d) }, 'Marcar reposição') : null,
+          l.kind === 'regular' && !l.cancelada ? button({ className: 'btn danger', onClick: () => p.onCancel(l, d) }, 'Cancelar aula') : null,
+          l.kind === 'regular' && l.cancelada ? button({ className: 'btn', onClick: () => p.onUndoCancel(l.ev) }, 'Desfazer cancelamento') : null,
+          l.kind !== 'regular' ? button({ className: 'btn', onClick: () => p.onEditEvento(l.ev) }, 'Editar') : null,
+          l.kind !== 'regular' ? button({ className: 'btn danger', onClick: () => p.onRemoveEvento(l.ev) }, 'Remover') : null)));
+  }
+
+  /* ---------- Marcar aula (reposição / extra / remarcar) ---------- */
+  function AulaModal(p) {
+    const ativos = p.alunos.filter((a) => a.ativo !== false).sort(byName);
+    const ev = p.evento, pre = p.pre || {};
+    const [f, setF] = useState(() => ev ? { alunoId: ev.alunoId, tipo: ev.tipo, data: ev.data, hora: ev.hora || '14:00', dur: Number(ev.dur) || 60, nota: ev.nota || '' }
+      : { alunoId: pre.alunoId || (ativos[0] ? ativos[0].id : ''), tipo: pre.tipo || 'reposicao', data: pre.data || fmt(new Date()), hora: pre.hora || '14:00', dur: pre.dur || 60, nota: pre.nota || '' });
+    const [cancelOrig, setCancelOrig] = useState(!!pre.cancelOrig);
+    const [erro, setErro] = useState('');
+    const set = (k, v) => setF((o) => Object.assign({}, o, { [k]: v }));
+    const submit = () => {
+      if (!f.alunoId) { setErro('Escolha o aluno.'); return; }
+      if (!f.data || !f.hora) { setErro('Informe a data e o horário.'); return; }
+      p.onSave({ alunoId: f.alunoId, tipo: f.tipo, data: f.data, hora: f.hora, dur: Number(f.dur) || 60, nota: f.nota.trim() }, { id: ev ? ev.id : null, cancelOrig: cancelOrig ? pre.cancelOrig : null });
+    };
+    return h(Overlay, { onClose: p.onClose, label: ev ? 'Editar aula' : 'Marcar aula' },
+      div({ className: 'ph' }, h2(null, ev ? 'Editar aula' : pre.cancelOrig ? 'Remarcar aula' : 'Marcar aula'), button({ className: 'icon-btn', onClick: p.onClose, 'aria-label': 'Fechar' }, '×')),
+      div({ className: 'pb' },
+        ativos.length === 0 ? div({ className: 'banner' }, 'Cadastre um aluno ativo antes de marcar uma aula.') : null,
+        h(Field, { id: 'r-aluno', label: 'Aluno' }, select({ id: 'r-aluno', className: 'ctl', value: f.alunoId, onChange: (e) => set('alunoId', e.target.value) }, ativos.map((a) => option({ key: a.id, value: a.id }, a.nome)))),
+        div({ className: 'form2' },
+          h(Field, { id: 'r-tipo', label: 'Tipo' }, select({ id: 'r-tipo', className: 'ctl', value: f.tipo, onChange: (e) => set('tipo', e.target.value) }, option({ value: 'reposicao' }, 'Reposição'), option({ value: 'extra' }, 'Aula extra'))),
+          h(Field, { id: 'r-dur', label: 'Duração' }, select({ id: 'r-dur', className: 'ctl', value: f.dur, onChange: (e) => set('dur', Number(e.target.value)) }, DURACOES.map((x) => option({ key: x, value: x }, x + ' min')))),
+          h(Field, { id: 'r-data', label: 'Data' }, input({ id: 'r-data', className: 'ctl', type: 'date', value: f.data, onChange: (e) => set('data', e.target.value) })),
+          h(Field, { id: 'r-hora', label: 'Horário' }, input({ id: 'r-hora', className: 'ctl', type: 'time', value: f.hora, onChange: (e) => set('hora', e.target.value) }))),
+        h(Field, { id: 'r-nota', label: 'Observação', hint: 'Opcional. Ex.: repõe a aula de segunda' }, input({ id: 'r-nota', className: 'ctl', value: f.nota, onChange: (e) => set('nota', e.target.value) })),
+        pre.cancelOrig ? label({ className: 'check' }, input({ type: 'checkbox', checked: cancelOrig, onChange: (e) => setCancelOrig(e.target.checked) }), 'Cancelar a aula original (' + shortDate(pre.cancelOrig.ds) + ', ' + pre.cancelOrig.hora + ')') : null,
+        erro ? div({ className: 'banner bad', role: 'alert' }, erro) : null),
+      div({ className: 'pf' }, span(null), div({ className: 'right' }, button({ className: 'btn', onClick: p.onClose }, 'Cancelar'), button({ className: 'btn primary', onClick: submit, disabled: ativos.length === 0 }, ev ? 'Salvar' : 'Marcar aula'))));
+  }
+
+  /* ---------- Ficha / cadastro do aluno ---------- */
+  const NOVO = () => ({
+    nome: '', cor: null, nascimento: '', ocupacao: '', telefone: '', email: '', responsavel: '', inicio: fmt(new Date()), ativo: true,
+    formato: 'Individual', modalidade: 'Presencial', local: '', aulas: [{ dia: 1, hora: '14:00', dur: 60 }],
+    cobranca: 'aula', valor: '', mensalidade: '', vencimento: '', forma: 'Pix', cobrarCanceladas: false, obsFinanceira: '',
+    nivel: 'B1', objetivo: '', foco: [], material: '', unidade: '', licao: '', fortes: '', dificuldades: '', interesses: '', notas: '', exemplo: false
+  });
+
+  function AlunoDrawer(p) {
+    const a = p.aluno;
+    const [f, setF] = useState(() => {
+      if (!a) return NOVO();
+      const n = NOVO();
+      Object.keys(n).forEach((k) => { if (a[k] !== undefined && a[k] !== null) n[k] = a[k]; });
+      n.telefone = a.telefone || a.contato || '';
+      n.valor = a.valor == null ? '' : String(a.valor); n.mensalidade = a.mensalidade == null ? '' : String(a.mensalidade);
+      n.vencimento = a.vencimento ? String(a.vencimento) : '';
+      n.aulas = (a.aulas || []).map((x) => ({ dia: Number(x.dia), hora: x.hora, dur: Number(x.dur) || 60 }));
+      n.ativo = a.ativo !== false; n.cor = Number.isInteger(a.cor) ? a.cor : colorIdx(a);
+      return n;
+    });
+    const [tab, setTab] = useState('dados');
+    const [erro, setErro] = useState('');
+    const [confirmDel, setConfirmDel] = useState(false);
+    const set = (k, v) => setF((o) => Object.assign({}, o, { [k]: v }));
+    const setAula = (k, key, v) => setF((o) => Object.assign({}, o, { aulas: o.aulas.map((x, j) => j === k ? Object.assign({}, x, { [key]: v }) : x) }));
+    const toggleFoco = (x) => setF((o) => Object.assign({}, o, { foco: o.foco.includes(x) ? o.foco.filter((y) => y !== x) : o.foco.concat([x]) }));
+    const corAtual = f.cor == null ? hash((a && a.id) || f.nome || 'x') % 8 : f.cor;
+    const prev = { id: a ? a.id : 'novo', cor: corAtual, nome: f.nome || '?' };
+    const submit = () => {
+      if (!f.nome.trim()) { setTab('dados'); setErro('Informe o nome do aluno.'); return; }
+      if (f.aulas.some((x) => !x.hora)) { setTab('aulas'); setErro('Preencha o horário de todas as aulas ou remova a linha.'); return; }
+      const o = Object.assign({}, f, {
+        nome: f.nome.trim(), cor: corAtual, valor: num(f.valor), mensalidade: num(f.mensalidade),
+        vencimento: f.vencimento ? Number(f.vencimento) : 0,
+        aulas: f.aulas.map((x) => ({ dia: Number(x.dia), hora: x.hora, dur: Number(x.dur) || 60 }))
+      });
+      delete o.contato;
+      p.onSave(a ? a.id : uid(), o);
+    };
+    const evs = a ? p.eventos.filter((e) => e.alunoId === a.id).sort((x, y) => String(y.data).localeCompare(String(x.data))) : [];
+    const pags = a ? p.pagamentos.filter((x) => x.alunoId === a.id).sort((x, y) => String(y.mes).localeCompare(String(x.mes))) : [];
+    const age = idade(f.nascimento);
+    const T_ = [['dados', 'Dados'], ['aulas', 'Aulas'], ['cobranca', 'Cobrança'], ['pedagogico', 'Pedagógico']].concat(a ? [['historico', 'Histórico']] : []);
+
+    let body;
+    if (tab === 'dados') {
+      body = [
+        div({ key: 'c', className: 'field' }, span({ className: 'lbl' }, 'Cor do aluno'), div({ className: 'swatches' }, [0, 1, 2, 3, 4, 5, 6, 7].map((k) => button({ key: k, className: 'sw', style: { background: 'var(--s' + (k + 1) + ')' }, 'aria-pressed': corAtual === k, 'aria-label': 'Cor ' + (k + 1), onClick: () => set('cor', k) }))), span({ className: 'hint' }, 'A cor identifica o aluno na agenda e nos gráficos.')),
+        div({ key: 'f', className: 'form2' },
+          h(Field, { id: 'f-nome', label: 'Nome *', full: true }, input({ id: 'f-nome', className: 'ctl', value: f.nome, autoFocus: !a, onChange: (e) => set('nome', e.target.value) })),
+          h(Field, { id: 'f-nasc', label: 'Data de nascimento', hint: age != null ? age + ' anos' : '' }, input({ id: 'f-nasc', className: 'ctl', type: 'date', value: f.nascimento, onChange: (e) => set('nascimento', e.target.value) })),
+          h(Field, { id: 'f-ocup', label: 'Profissão ou escola' }, input({ id: 'f-ocup', className: 'ctl', value: f.ocupacao, onChange: (e) => set('ocupacao', e.target.value) })),
+          h(Field, { id: 'f-tel', label: 'Telefone / WhatsApp' }, input({ id: 'f-tel', className: 'ctl', type: 'tel', value: f.telefone, onChange: (e) => set('telefone', e.target.value) })),
+          h(Field, { id: 'f-mail', label: 'E-mail' }, input({ id: 'f-mail', className: 'ctl', type: 'email', value: f.email, onChange: (e) => set('email', e.target.value) })),
+          h(Field, { id: 'f-resp', label: 'Responsável', hint: 'Para alunos menores de idade' }, input({ id: 'f-resp', className: 'ctl', value: f.responsavel, onChange: (e) => set('responsavel', e.target.value) })),
+          h(Field, { id: 'f-ini', label: 'Início das aulas' }, input({ id: 'f-ini', className: 'ctl', type: 'date', value: f.inicio, onChange: (e) => set('inicio', e.target.value) })),
+          div({ className: 'field full' }, label({ className: 'check' }, input({ type: 'checkbox', checked: f.ativo, onChange: (e) => set('ativo', e.target.checked) }), 'Aluno ativo (aparece na agenda e nas contas do mês)')))
+      ];
+    } else if (tab === 'aulas') {
+      body = [
+        div({ key: 'f', className: 'form2' },
+          h(Field, { id: 'f-form', label: 'Formato' }, select({ id: 'f-form', className: 'ctl', value: f.formato, onChange: (e) => set('formato', e.target.value) }, ['Individual', 'Dupla', 'Grupo'].map((x) => option({ key: x, value: x }, x)))),
+          h(Field, { id: 'f-mod', label: 'Modalidade' }, select({ id: 'f-mod', className: 'ctl', value: f.modalidade, onChange: (e) => set('modalidade', e.target.value) }, ['Presencial', 'Online', 'Híbrido'].map((x) => option({ key: x, value: x }, x)))),
+          h(Field, { id: 'f-local', label: 'Local ou link da aula', full: true, hint: 'Endereço, link do Meet/Zoom, etc.' }, input({ id: 'f-local', className: 'ctl', value: f.local, onChange: (e) => set('local', e.target.value) }))),
+        div({ key: 's', className: 'field' }, span({ className: 'lbl' }, 'Horários fixos na semana'),
+          div({ className: 'slots' }, f.aulas.map((x, k) => div({ key: k, className: 'slot' },
+            select({ className: 'ctl', 'aria-label': 'Dia da semana', value: x.dia, onChange: (e) => setAula(k, 'dia', Number(e.target.value)) }, ORDEM.map((d) => option({ key: d, value: d }, DIAS[d]))),
+            input({ className: 'ctl', type: 'time', 'aria-label': 'Horário', value: x.hora, onChange: (e) => setAula(k, 'hora', e.target.value) }),
+            select({ className: 'ctl', 'aria-label': 'Duração', value: x.dur, onChange: (e) => setAula(k, 'dur', Number(e.target.value)) }, DURACOES.map((d) => option({ key: d, value: d }, d + ' min'))),
+            button({ className: 'icon-btn', onClick: () => setF((o) => Object.assign({}, o, { aulas: o.aulas.filter((_, j) => j !== k) })), 'aria-label': 'Remover horário' }, '×')))),
+          div(null, button({ className: 'btn small', onClick: () => setF((o) => Object.assign({}, o, { aulas: o.aulas.concat([{ dia: 1, hora: '14:00', dur: 60 }]) })) }, '+ Adicionar horário')),
+          span({ className: 'hint' }, 'Aluno sem horário fixo? Deixe a lista vazia e marque aulas avulsas na agenda.'))
+      ];
+    } else if (tab === 'cobranca') {
+      body = [
+        div({ key: 'f', className: 'form2' },
+          h(Field, { id: 'f-cobr', label: 'Como você cobra' }, select({ id: 'f-cobr', className: 'ctl', value: f.cobranca, onChange: (e) => set('cobranca', e.target.value) }, option({ value: 'aula' }, 'Por aula'), option({ value: 'mensal' }, 'Mensalidade fixa'))),
+          f.cobranca === 'aula'
+            ? h(Field, { id: 'f-valor', label: 'Valor por aula (R$)' }, input({ id: 'f-valor', className: 'ctl', type: 'number', inputMode: 'decimal', min: '0', step: '0.01', value: f.valor, onChange: (e) => set('valor', e.target.value) }))
+            : h(Field, { id: 'f-mens', label: 'Mensalidade (R$)' }, input({ id: 'f-mens', className: 'ctl', type: 'number', inputMode: 'decimal', min: '0', step: '0.01', value: f.mensalidade, onChange: (e) => set('mensalidade', e.target.value) })),
+          h(Field, { id: 'f-venc', label: 'Dia de vencimento' }, select({ id: 'f-venc', className: 'ctl', value: f.vencimento, onChange: (e) => set('vencimento', e.target.value) }, option({ value: '' }, 'Sem dia fixo'), Array.from({ length: 31 }, (_, k) => option({ key: k + 1, value: String(k + 1) }, 'Dia ' + (k + 1))))),
+          h(Field, { id: 'f-forma', label: 'Forma de pagamento' }, select({ id: 'f-forma', className: 'ctl', value: f.forma, onChange: (e) => set('forma', e.target.value) }, FORMAS.map((x) => option({ key: x, value: x }, x)))),
+          f.cobranca === 'aula' ? div({ className: 'field full' }, label({ className: 'check' }, input({ type: 'checkbox', checked: f.cobrarCanceladas, onChange: (e) => set('cobrarCanceladas', e.target.checked) }), 'Cobrar aulas canceladas'), span({ className: 'hint' }, 'Com esta opção, a aula cancelada continua na conta e a reposição dela não é cobrada de novo.')) : null,
+          h(Field, { id: 'f-of', label: 'Observações sobre pagamento', full: true }, textarea({ id: 'f-of', className: 'ctl', value: f.obsFinanceira, onChange: (e) => set('obsFinanceira', e.target.value) })))
+      ];
+    } else if (tab === 'pedagogico') {
+      body = [
+        div({ key: 'f', className: 'form2' },
+          h(Field, { id: 'f-nivel', label: 'Nível' }, select({ id: 'f-nivel', className: 'ctl', value: f.nivel, onChange: (e) => set('nivel', e.target.value) }, NIVEIS.map((n) => option({ key: n[0], value: n[0] }, n[0] + ' · ' + n[1])))),
+          h(Field, { id: 'f-obj', label: 'Objetivo do aluno' }, input({ id: 'f-obj', className: 'ctl', value: f.objetivo, onChange: (e) => set('objetivo', e.target.value) })),
+          div({ className: 'field full' }, span({ className: 'lbl' }, 'Foco das aulas'), div({ className: 'chips' }, FOCOS.map((x) => button({ key: x, className: 'chip', 'aria-pressed': f.foco.includes(x), onClick: () => toggleFoco(x) }, x)))),
+          h(Field, { id: 'f-mat', label: 'Material em uso', full: true, hint: 'Livro, apostila, podcast, site… o que você usa com este aluno agora' }, textarea({ id: 'f-mat', className: 'ctl', value: f.material, onChange: (e) => set('material', e.target.value) })),
+          h(Field, { id: 'f-uni', label: 'Unidade ou página atual' }, input({ id: 'f-uni', className: 'ctl', value: f.unidade, onChange: (e) => set('unidade', e.target.value) })),
+          h(Field, { id: 'f-lic', label: 'Lição de casa atual' }, input({ id: 'f-lic', className: 'ctl', value: f.licao, onChange: (e) => set('licao', e.target.value) })),
+          h(Field, { id: 'f-for', label: 'Pontos fortes' }, textarea({ id: 'f-for', className: 'ctl', value: f.fortes, onChange: (e) => set('fortes', e.target.value) })),
+          h(Field, { id: 'f-dif', label: 'Dificuldades' }, textarea({ id: 'f-dif', className: 'ctl', value: f.dificuldades, onChange: (e) => set('dificuldades', e.target.value) })),
+          h(Field, { id: 'f-int', label: 'Interesses e hobbies', full: true, hint: 'Ajuda a escolher temas de conversa' }, input({ id: 'f-int', className: 'ctl', value: f.interesses, onChange: (e) => set('interesses', e.target.value) })),
+          h(Field, { id: 'f-notas', label: 'Anotações e progresso', full: true }, textarea({ id: 'f-notas', className: 'ctl', style: { minHeight: '120px' }, value: f.notas, onChange: (e) => set('notas', e.target.value) })))
+      ];
+    } else {
+      body = [
+        div({ key: 'e', className: 'field' }, span({ className: 'sect' }, 'Reposições, extras e cancelamentos'),
+          evs.length === 0 ? span({ className: 'hint' }, 'Nada registrado ainda.') : div({ className: 'evlist' }, evs.map((e) => div({ key: e.id, className: 'ev' },
+            span({ className: 'tnum' }, shortDate(e.data) + (e.hora ? ' · ' + e.hora : '') + ' — ' + (e.tipo === 'reposicao' ? 'Reposição' : e.tipo === 'extra' ? 'Aula extra' : 'Aula cancelada') + (e.nota ? ' (' + e.nota + ')' : '')),
+            button({ className: 'btn small ghost', onClick: () => p.onRemoveEvento(e) }, 'Remover'))))),
+        div({ key: 'p', className: 'field' }, span({ className: 'sect' }, 'Pagamentos registrados'),
+          pags.length === 0 ? span({ className: 'hint' }, 'Nenhum pagamento marcado ainda.') : div({ className: 'evlist' }, pags.map((x) => div({ key: x.id, className: 'ev' },
+            span({ className: 'tnum' }, cap(MESES[Number(String(x.mes).slice(5)) - 1] || '') + ' de ' + String(x.mes).slice(0, 4) + ' — ' + money.format(num(x.valor))), span({ className: 'tag ok' }, 'Pago' + (x.pagoEm ? ' em ' + shortDate(x.pagoEm) : ''))))))
+      ];
+    }
+
+    return h(Overlay, { onClose: p.onClose, variant: 'drawer', label: a ? 'Ficha de ' + a.nome : 'Novo aluno' },
+      div({ className: 'ph' }, h(Avatar, { a: prev, size: 46 }),
+        div({ style: { flex: 1, minWidth: 0 } }, h2(null, a ? (f.nome || a.nome) : 'Novo aluno'), div({ className: 'note' }, a ? [f.nivel, f.modalidade, f.formato].filter(Boolean).join(' · ') : 'Preencha os dados em cada aba')),
+        button({ className: 'icon-btn', onClick: p.onClose, 'aria-label': 'Fechar' }, '×')),
+      div({ className: 'dtabs', role: 'tablist' }, T_.map((x) => button({ key: x[0], className: 'dtab', role: 'tab', 'aria-selected': tab === x[0], onClick: () => setTab(x[0]) }, x[1]))),
+      div({ className: 'pb' }, body, erro ? div({ className: 'banner bad', role: 'alert' }, erro) : null),
+      div({ className: 'pf' },
+        a ? (confirmDel
+          ? div({ className: 'right' }, span({ className: 'muted' }, 'Apagar este aluno e o histórico dele?'), button({ className: 'btn danger', onClick: () => p.onDelete(a) }, 'Sim, apagar'), button({ className: 'btn', onClick: () => setConfirmDel(false) }, 'Não'))
+          : button({ className: 'btn danger ghost', onClick: () => setConfirmDel(true) }, 'Apagar aluno')) : span(null),
+        div({ className: 'right' }, button({ className: 'btn', onClick: p.onClose }, 'Cancelar'), button({ className: 'btn primary', onClick: submit }, 'Salvar aluno'))));
+  }
+
+  /* ---------- App ---------- */
+  const tabFromHash = () => { const t = (location.hash || '').replace('#', ''); return TABS.some((x) => x[0] === t) ? t : 'semana'; };
+
+  function ThemeToggle() {
+    const eff = () => { const at = document.documentElement.getAttribute('data-theme'); if (at === 'dark') return true; if (at === 'light') return false; try { return window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) { return false; } };
+    const [dark, setDark] = useState(eff);
+    useEffect(() => { try { const t = localStorage.getItem('agenda-tema'); if (t === 'dark' || t === 'light') { document.documentElement.setAttribute('data-theme', t); setDark(t === 'dark'); } } catch (e) {} }, []);
+    const toggle = () => { const n = dark ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', n); setDark(n === 'dark'); try { localStorage.setItem('agenda-tema', n); } catch (e) {} };
+    return button({ className: 'theme', onClick: toggle, 'aria-label': dark ? 'Usar tema claro' : 'Usar tema escuro', title: dark ? 'Tema claro' : 'Tema escuro' }, dark ? '☀' : '☾');
+  }
+
+  function App() {
+    const store = useStore(), data = store.data, now = useNow();
+    const [tab, setTab] = useState(tabFromHash);
+    const [editing, setEditing] = useState(null);
+    const [aula, setAula] = useState(null);
+    const [sheet, setSheet] = useState(null);
+    const [toast, setToast] = useState('');
+    const tRef = useRef(null);
+    useEffect(() => { const f = () => setTab(tabFromHash()); window.addEventListener('hashchange', f); return () => window.removeEventListener('hashchange', f); }, []);
+    const goTab = (t) => { setTab(t); try { location.hash = t; } catch (e) {} };
+    const notify = (m) => { setToast(m); clearTimeout(tRef.current); tRef.current = setTimeout(() => setToast(''), 2800); };
+    const act = (fn, ok) => Promise.resolve().then(fn).then(() => { if (ok) notify(ok); }).catch(() => notify('Não foi possível salvar. Tente de novo.'));
+
+    const saveAluno = (id, obj) => { act(() => store.save('alunos', id, obj), 'Aluno salvo'); setEditing(null); };
+    const deleteAluno = (a) => {
+      act(() => {
+        const ps = [store.remove('alunos', a.id)];
+        data.eventos.filter((e) => e.alunoId === a.id).forEach((e) => ps.push(store.remove('eventos', e.id)));
+        data.pagamentos.filter((x) => x.alunoId === a.id).forEach((x) => ps.push(store.remove('pagamentos', x.id)));
+        return Promise.all(ps);
+      }, 'Aluno apagado');
+      setEditing(null);
+    };
+    const saveAula = (obj, opts) => {
+      act(() => {
+        const ps = [store.save('eventos', opts.id || uid(), obj)];
+        if (opts.cancelOrig) { const c = opts.cancelOrig; ps.push(store.save('eventos', cancelId(obj.alunoId, c.ds, c.hora), { alunoId: obj.alunoId, tipo: 'cancelada', data: c.ds, hora: c.hora, nota: '' })); }
+        return Promise.all(ps);
+      }, opts.id ? 'Aula atualizada' : obj.tipo === 'extra' ? 'Aula extra marcada' : 'Reposição marcada');
+      setAula(null);
+    };
+    const removeEvento = (e) => { act(() => store.remove('eventos', e.id), 'Removido'); setSheet(null); };
+    const cancelLesson = (l, d) => { const ds = fmt(d); act(() => store.save('eventos', cancelId(l.aluno.id, ds, l.hora), { alunoId: l.aluno.id, tipo: 'cancelada', data: ds, hora: l.hora, nota: '' }), 'Aula cancelada'); setSheet(null); };
+    const togglePago = (r) => {
+      if (r.pago) act(() => store.remove('pagamentos', r.pid), 'Pagamento desmarcado');
+      else act(() => store.save('pagamentos', r.pid, { alunoId: r.a.id, mes: r.st.ym, valor: r.st.total, pagoEm: fmt(new Date()) }), 'Pagamento de ' + r.a.nome + ' registrado');
+    };
+    const remarcar = (l, d) => { const ds = fmt(d); setSheet(null); setAula({ pre: { alunoId: l.aluno.id, tipo: 'reposicao', data: ds, hora: l.hora, dur: l.dur, nota: 'Repõe a aula de ' + shortDate(ds), cancelOrig: l.cancelada ? null : { ds, hora: l.hora } } }); };
+    const onMove = (l, from, to, hora) => {
+      const ds = fmt(to), fs = fmt(from);
+      if (ds === fs && hora === l.hora) return;
+      setAula({ pre: { alunoId: l.aluno.id, tipo: 'reposicao', data: ds, hora, dur: l.dur, nota: 'Remarcada de ' + shortDate(fs) + ', ' + l.hora, cancelOrig: { ds: fs, hora: l.hora } } });
+    };
+    const onSlot = (d, hora) => setAula({ pre: { data: d ? fmt(d) : fmt(new Date()), hora: hora || '14:00', tipo: 'extra' } });
+
+    const loadExamples = () => {
+      const ws = weekStart(new Date());
+      const dayOf = (k) => fmt(new Date(ws.getFullYear(), ws.getMonth(), ws.getDate() + k));
+      act(() => Promise.all([
+        store.save('alunos', 'ex_marina', { nome: 'Marina Souza', cor: 0, nivel: 'B1', telefone: '(84) 90000-0001', email: 'marina@exemplo.com', ocupacao: 'Analista de marketing', cobranca: 'aula', valor: 90, mensalidade: 0, vencimento: 5, forma: 'Pix', cobrarCanceladas: false, formato: 'Individual', modalidade: 'Online', local: 'https://meet.google.com/exemplo', foco: ['Entrevista de emprego', 'Conversação'], aulas: [{ dia: 1, hora: '18:00', dur: 60 }, { dia: 3, hora: '18:00', dur: 60 }], material: 'English File Intermediate. Podcast 6 Minute English para listening.', unidade: 'Unidade 5, Present Perfect', licao: 'Exercícios 3 e 4 da página 52', objetivo: 'Entrevista de emprego em inglês', fortes: 'Boa fluência em conversas curtas', dificuldades: 'Pronúncia do th', interesses: 'Séries, corrida, viagens', notas: 'Revisar pronúncia no começo da aula.', ativo: true, exemplo: true }),
+        store.save('alunos', 'ex_carlos', { nome: 'Carlos Lima', cor: 1, nivel: 'A2', telefone: '', email: '', cobranca: 'aula', valor: 75, mensalidade: 0, vencimento: 10, forma: 'Dinheiro', cobrarCanceladas: true, formato: 'Individual', modalidade: 'Presencial', local: 'Rua das Flores, 120', foco: ['Viagem', 'Vocabulário'], aulas: [{ dia: 2, hora: '19:30', dur: 60 }], material: 'Cambridge Empower A2. Vocabulário no Anki.', unidade: 'Unit 3', licao: '', objetivo: 'Viagem a Lisboa', interesses: 'Futebol, culinária', notas: '', ativo: true, exemplo: true }),
+        store.save('alunos', 'ex_beatriz', { nome: 'Beatriz Alves', cor: 2, nivel: 'C1', telefone: '', email: '', cobranca: 'mensal', valor: 0, mensalidade: 640, vencimento: 1, forma: 'Transferência', formato: 'Individual', modalidade: 'Online', local: 'https://zoom.us/j/exemplo', foco: ['IELTS', 'Escrita'], aulas: [{ dia: 4, hora: '09:00', dur: 90 }, { dia: 5, hora: '09:00', dur: 90 }], material: 'Advanced Grammar in Use e artigos do The Economist.', unidade: '', licao: 'Redação sobre urbanização', objetivo: 'IELTS, meta banda 7.5', notas: 'Simulado de writing toda sexta.', ativo: true, exemplo: true }),
+        store.save('alunos', 'ex_pedro', { nome: 'Pedro Nunes', cor: 4, nivel: 'B2', telefone: '', email: '', cobranca: 'aula', valor: 100, mensalidade: 0, vencimento: 15, forma: 'Pix', formato: 'Individual', modalidade: 'Online', local: '', foco: ['Business English'], aulas: [{ dia: 1, hora: '18:30', dur: 60 }, { dia: 4, hora: '12:00', dur: 45 }], material: 'Market Leader Upper-Intermediate.', unidade: 'Unit 7, Negotiations', objetivo: 'Reuniões com clientes no exterior', notas: '', ativo: true, exemplo: true }),
+        store.save('eventos', 'ex_ev1', { alunoId: 'ex_marina', tipo: 'cancelada', data: dayOf(2), hora: '18:00', nota: '' }),
+        store.save('eventos', 'ex_ev2', { alunoId: 'ex_marina', tipo: 'reposicao', data: dayOf(5), hora: '10:00', dur: 60, nota: 'Repõe a aula de quarta' }),
+        store.save('eventos', 'ex_ev3', { alunoId: 'ex_carlos', tipo: 'extra', data: dayOf(3), hora: '20:00', dur: 45, nota: 'Revisão antes da viagem' })
+      ]), 'Exemplos carregados');
+    };
+    const clearExamples = () => act(() => {
+      const ids = data.alunos.filter((a) => a.exemplo).map((a) => a.id), ps = [];
+      ids.forEach((id) => ps.push(store.remove('alunos', id)));
+      data.eventos.filter((e) => ids.includes(e.alunoId)).forEach((e) => ps.push(store.remove('eventos', e.id)));
+      data.pagamentos.filter((x) => ids.includes(x.alunoId)).forEach((x) => ps.push(store.remove('pagamentos', x.id)));
+      return Promise.all(ps);
+    }, 'Exemplos apagados');
+
+    const temExemplos = data.alunos.some((a) => a.exemplo);
+    const editAluno = editing && editing !== 'new' ? data.alunos.find((a) => a.id === editing) : null;
+    const tabIdx = Math.max(0, TABS.findIndex((x) => x[0] === tab));
+
+    let body;
+    if (!store.loaded) {
+      body = div({ className: 'empty' }, h2(null, 'Carregando seus alunos…'), para(null, store.slow ? 'Está demorando mais que o normal para acessar seus dados salvos. Confira sua conexão.' : 'Buscando a agenda e as contas do mês.'));
+    } else if (data.alunos.length === 0) {
+      body = div({ className: 'empty' }, h2(null, 'Comece cadastrando seu primeiro aluno'),
+        para(null, 'Cada aluno tem horários fixos, valor da aula, material em uso e anotações. A agenda da semana e as contas do mês saem daí.'),
+        div({ style: { display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' } }, button({ className: 'btn primary', onClick: () => setEditing('new') }, 'Cadastrar aluno'), button({ className: 'btn', onClick: loadExamples }, 'Ver com exemplos')));
+    } else if (tab === 'alunos') {
+      body = h(AlunosView, { key: 'alunos', alunos: data.alunos, eventos: data.eventos, now, onOpen: setEditing, onNew: () => setEditing('new') });
+    } else if (tab === 'recebimentos') {
+      body = h(RecebimentosView, { key: 'rec', alunos: data.alunos, eventos: data.eventos, pagamentos: data.pagamentos, now, onOpen: setEditing, onTogglePago: togglePago });
+    } else {
+      body = h(SemanaView, { key: 'sem', alunos: data.alunos, eventos: data.eventos, now, onOpen: (l, d) => setSheet({ l, d }), onSlot, onMove });
+    }
+
+    return div({ className: 'app' },
+      header({ className: 'bar' },
+        div({ className: 'brand' }, div({ className: 'logo', 'aria-hidden': 'true' }, 'A'), b(null, 'Agenda de Alunos')),
+        div({ className: 'tabs', role: 'tablist', style: { '--i': tabIdx } }, div({ className: 'tab-ind' }), TABS.map((t) => button({ key: t[0], className: 'tab', role: 'tab', 'aria-selected': tab === t[0], onClick: () => goTab(t[0]) }, t[1]))),
+        h(ThemeToggle)),
+      store.loaded ? h(Hero, { alunos: data.alunos, eventos: data.eventos, pagamentos: data.pagamentos, now, goTab }) : null,
+      store.status === 'error' ? div({ className: 'banner bad', role: 'alert' }, 'Não foi possível acessar o armazenamento. Suas alterações podem não ser salvas.') : null,
+      temExemplos ? div({ className: 'banner' }, span(null, 'Você está vendo dados de exemplo.'), button({ className: 'btn small', onClick: clearExamples }, 'Apagar exemplos')) : null,
+      div({ className: 'view', key: tab + (store.loaded ? 'l' : 'x') }, body),
+      div({ className: 'foot' }, store.status === 'cloud' ? 'Seus dados ficam salvos na sua conta e aparecem em qualquer aparelho.' : store.status === 'local' ? 'Seus dados ficam salvos só neste navegador. Se você limpar os dados do site, eles somem.' : ''),
+      editing ? h(AlunoDrawer, { key: editing, aluno: editAluno, eventos: data.eventos, pagamentos: data.pagamentos, onSave: saveAluno, onDelete: deleteAluno, onRemoveEvento: (e) => act(() => store.remove('eventos', e.id), 'Removido'), onClose: () => setEditing(null) }) : null,
+      sheet ? h(LessonSheet, { l: sheet.l, d: sheet.d, notify, onClose: () => setSheet(null), onFicha: (id) => { setSheet(null); setEditing(id); }, onCancel: cancelLesson, onUndoCancel: (e) => { removeEvento(e); }, onRemoveEvento: removeEvento, onRemarcar: remarcar, onEditEvento: (e) => { setSheet(null); setAula({ evento: e }); } }) : null,
+      aula ? h(AulaModal, { key: JSON.stringify(aula).length + (aula.evento ? aula.evento.id : ''), alunos: data.alunos, pre: aula.pre, evento: aula.evento, onSave: saveAula, onClose: () => setAula(null) }) : null,
+      toast ? div({ className: 'toast', role: 'status' }, toast) : null);
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+})();
+</script>
