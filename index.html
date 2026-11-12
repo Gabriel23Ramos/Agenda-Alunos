@@ -112,6 +112,7 @@ button { cursor: pointer; }
 .tag.warn { background: var(--warn-bg); color: var(--warn-fg); }
 .tag.ok { background: var(--ok-bg); color: var(--ok-fg); }
 .tag.bad { background: var(--bad-bg); color: var(--bad-fg); }
+.tag.exp { background: var(--accent-soft); color: var(--accent); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 5px 12px; font-size: 13px; font-weight: 600; color: var(--muted); transition: all .15s; }
 .chip:hover { border-color: var(--fg); color: var(--fg); }
@@ -139,7 +140,7 @@ button { cursor: pointer; }
 .blk.tiny { flex-direction: row; align-items: center; gap: 6px; padding-block: 2px; }
 .blk.tiny .blk-time { order: -1; }
 .blk .tag { align-self: flex-start; margin-top: 2px; }
-.blk.reposicao, .blk.extra { border-left-style: solid; background-image: repeating-linear-gradient(135deg, color-mix(in srgb, var(--c) 14%, transparent) 0 6px, transparent 6px 12px); }
+.blk.reposicao, .blk.extra, .blk.experimental { border-left-style: solid; background-image: repeating-linear-gradient(135deg, color-mix(in srgb, var(--c) 14%, transparent) 0 6px, transparent 6px 12px); }
 .blk.cancelled { opacity: .62; background: var(--surface2); border-left-color: var(--bad-fg); }
 .blk.cancelled .blk-name { text-decoration: line-through; }
 .tg-hint { position: absolute; left: 3px; right: 3px; border: 2px dashed var(--accent); border-radius: 10px; background: var(--accent-soft); opacity: .8; pointer-events: none; z-index: 4; }
@@ -164,6 +165,22 @@ button { cursor: pointer; }
 .lcard.cancelled .n { text-decoration: line-through; }
 .lcard .n { font-weight: 600; overflow-wrap: anywhere; }
 .lcard .m { font-size: 13px; color: var(--muted); }
+
+/* Semana: mês */
+.mg { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.mg-h { text-align: center; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); padding: 4px 0; }
+.mg-c { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 6px; min-height: 64px; display: flex; flex-direction: column; gap: 3px; min-width: 0; cursor: pointer; transition: border-color .15s, transform .12s; }
+@media (min-width: 900px) { .mg-c { min-height: 112px; } }
+.mg-c:hover { border-color: var(--muted); }
+.mg-c.out { opacity: .45; }
+.mg-c.sel { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.mg-n { font-family: var(--font-display); font-weight: 800; font-size: 15px; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; }
+.mg-c.today .mg-n { background: var(--accent); color: #fff; }
+@media (max-width: 520px) { .mg-c { padding: 4px 2px; align-items: center; } }
+.mg-p { border: 0; border-left: 3px solid var(--c); background: color-mix(in srgb, var(--c) 17%, var(--surface)); border-radius: 6px; padding: 2px 6px; font-size: 12px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
+.mg-p:hover { filter: brightness(1.08); }
+.mg-p.cancelled { opacity: .55; text-decoration: line-through; }
+.mg-more { font-size: 11px; color: var(--muted); padding-left: 4px; }
 
 /* Alunos */
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
@@ -273,6 +290,50 @@ textarea.ctl { resize: vertical; min-height: 84px; }
 .kv dd { margin: 0; overflow-wrap: anywhere; }
 .foot { color: var(--muted); font-size: 12px; }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--ink-fg); padding: 10px 18px; border-radius: 12px; z-index: 40; max-width: calc(100% - 32px); font-weight: 500; animation: rise .2s ease both; box-shadow: var(--shadow); }
+/* Celular */
+@media (max-width: 640px) {
+  body { font-size: 15px; padding-block: 12px 40px; }
+  .app { gap: 14px; }
+  .bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+  .brand { margin-right: 0; }
+  .tabs { grid-column: 1 / -1; grid-row: 2; min-width: 0; flex: none; width: 100%; }
+  .tab { padding: 11px 6px; }
+  .theme { grid-row: 1; grid-column: 2; }
+  .hero { padding: 18px; border-radius: 18px; }
+  .hero::after { font-size: 100px; }
+  .toolbar { gap: 8px; }
+  .toolbar .grow { flex-basis: 100%; order: 5; }
+  .toolbar .btn.primary { margin-left: auto; }
+  .range { font-size: 19px; }
+  .search { max-width: none; flex-basis: 100%; }
+  .cards { grid-template-columns: 1fr; }
+  .tiles { grid-template-columns: 1fr; }
+  .tile .v, .stat .v { font-size: 30px; }
+  .panel-card { padding: 14px; }
+  .rk { grid-template-columns: 84px minmax(0, 1fr); }
+  .prow { padding: 12px; }
+  .prow .tot { font-size: 18px; }
+  .ov.modal { padding: 0; align-items: flex-end; }
+  .panel.modal { max-width: none; border-radius: 20px 20px 0 0; margin: 0; max-height: 94vh; overflow-y: auto; }
+  .panel.drawer { width: 100%; }
+  .ph { padding: 14px 16px; }
+  .pb { padding: 16px; }
+  .pf { padding-inline: 16px; }
+  .pf .right { width: 100%; }
+  .pf .right .btn { flex: 1 1 auto; }
+  .dtabs { padding-inline: 8px; }
+  .kv { grid-template-columns: 1fr; gap: 0; }
+  .kv dt { margin-top: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  .ctl { font-size: 16px; }
+  .mg { gap: 3px; }
+  .mg-c { border-radius: 9px; }
+  .mg-n { width: 24px; height: 24px; font-size: 13px; }
+  .daychips { gap: 4px; }
+  .lcard { padding: 12px; }
+  .btn, .icon-btn { min-height: 44px; }
+  .icon-btn { width: 44px; }
+  .icon-btn.small, .btn.small { min-height: 34px; }
+}
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 </style>
 
@@ -339,12 +400,15 @@ textarea.ctl { resize: vertical; min-height: 84px; }
         }
       });
     });
-    eventos.filter((e) => e.data === ds && (e.tipo === 'reposicao' || e.tipo === 'extra')).forEach((e) => {
-      const a = alunos.find((x) => x.id === e.alunoId);
+    eventos.filter((e) => e.data === ds && (e.tipo === 'reposicao' || e.tipo === 'extra' || e.tipo === 'experimental')).forEach((e) => {
+      const a = e.tipo === 'experimental' ? { id: 'exp_' + e.id, nome: e.nome || 'Aula experimental', cor: 7, nivel: '', modalidade: e.modalidade || '', local: e.local || '', telefone: e.telefone || '', experimental: true } : alunos.find((x) => x.id === e.alunoId);
       if (a) out.push({ key: e.id, aluno: a, hora: e.hora || '00:00', dur: Number(e.dur) || 60, kind: e.tipo, ev: e, nota: e.nota });
     });
     return out.sort((x, y) => String(x.hora).localeCompare(String(y.hora)));
   }
+
+  const kindTag = (l, longo) => l.cancelada ? ['bad', 'Cancelada'] : l.kind === 'reposicao' ? ['warn', 'Reposição'] : l.kind === 'extra' ? ['ok', longo ? 'Aula extra' : 'Extra'] : l.kind === 'experimental' ? ['exp', longo ? 'Aula experimental' : 'Experimental'] : null;
+  const tagEl = (l, longo) => { const t = kindTag(l, longo); return t ? span({ className: 'tag ' + t[0] }, t[1]) : null; };
 
   function layoutDay(items) {
     const arr = items.map((l) => ({ l, s: mins(l.hora), e: mins(l.hora) + (l.dur || 60), lane: 0, lanes: 1 })).sort((a, c) => a.s - c.s || a.e - c.e);
@@ -446,6 +510,7 @@ textarea.ctl { resize: vertical; min-height: 84px; }
     const [loaded, setLoaded] = useState(false);
     const [slow, setSlow] = useState(false);
     const dbRef = useRef(null);
+    const [legacy, setLegacy] = useState(null);
     useEffect(() => {
       let dead = false; const unsubs = [];
       const timer = setTimeout(() => setSlow(true), 10000);
@@ -465,7 +530,13 @@ textarea.ctl { resize: vertical; min-height: 84px; }
             const rows = snap.docs.map((d) => Object.assign({ id: d.id }, d.data()));
             setData((prev) => { const n = Object.assign({}, prev); n[c] = rows; return n; });
             if (!snap.metadata.fromCache || rows.length > 0) got[c] = true;
-            if (COLS.every((k) => got[k])) { setLoaded(true); setSlow(false); clearTimeout(timer); }
+            if (COLS.every((k) => got[k])) {
+              setLoaded(true); setSlow(false); clearTimeout(timer);
+              try {
+                const raw = localStorage.getItem(LS), j = raw ? JSON.parse(raw) : null;
+                if (j && Array.isArray(j.alunos) && j.alunos.length) setLegacy(j);
+              } catch (e) {}
+            }
           }, () => { setStatus('error'); setLoaded(true); clearTimeout(timer); });
           unsubs.push(u);
         });
@@ -485,7 +556,14 @@ textarea.ctl { resize: vertical; min-height: 84px; }
       setData((prev) => { const n = Object.assign({}, prev); n[col] = prev[col].filter((r) => r.id !== id); persist(n); return n; });
       return Promise.resolve();
     }, []);
-    return { data, status, loaded, slow, save, remove };
+    const importLegacy = useCallback(() => {
+      const db = dbRef.current, j = legacy;
+      if (!db || !j) return Promise.resolve();
+      const ps = [];
+      COLS.forEach((c) => (j[c] || []).forEach((r) => { const o = Object.assign({}, r); const id = o.id; delete o.id; if (id) ps.push(db.collection(c).doc(id).set(o)); }));
+      return Promise.all(ps).then(() => setLegacy(null));
+    }, [legacy]);
+    return { data, status, loaded, slow, save, remove, legacy, importLegacy, dismissLegacy: () => setLegacy(null) };
   }
 
   /* ---------- Peças básicas ---------- */
@@ -582,7 +660,7 @@ textarea.ctl { resize: vertical; min-height: 84px; }
             },
               div({ className: 'blk-name' }, l.aluno.nome),
               div({ className: 'blk-time' }, l.hora + '–' + hm(it.e)),
-              height >= 46 && (l.kind !== 'regular' || l.cancelada) ? span({ className: 'tag ' + (l.cancelada ? 'bad' : l.kind === 'extra' ? 'ok' : 'warn') }, l.cancelada ? 'Cancelada' : l.kind === 'extra' ? 'Extra' : 'Reposição') : null);
+              height >= 46 ? tagEl(l) : null);
           }),
           isToday && nowMin >= minM && nowMin <= maxM ? div({ className: 'now', style: { top: (nowMin - minM) / 60 * ROW } }) : null);
       }));
@@ -604,11 +682,59 @@ textarea.ctl { resize: vertical; min-height: 84px; }
         div({ className: 'dlist' }, ls.map((l) => button({ key: l.key, className: 'lcard' + (l.cancelada ? ' cancelled' : ''), style: { '--c': colorVar(l.aluno) }, onClick: () => p.onOpen(l, d) },
           div({ className: 't' }, l.hora),
           div({ style: { minWidth: 0 } }, div({ className: 'n' }, l.aluno.nome), div({ className: 'm' }, l.dur + ' min' + (l.aluno.modalidade ? ' · ' + l.aluno.modalidade : '') + (l.aluno.nivel ? ' · ' + l.aluno.nivel : ''))),
-          l.cancelada ? span({ className: 'tag bad' }, 'Cancelada') : l.kind === 'reposicao' ? span({ className: 'tag warn' }, 'Reposição') : l.kind === 'extra' ? span({ className: 'tag ok' }, 'Extra') : null))),
+          tagEl(l)))),
       button({ className: 'btn', onClick: () => p.onSlot(d, '14:00') }, '+ Marcar aula neste dia'));
   }
 
+  function MonthGrid(p) {
+    const { alunos, eventos, now } = p;
+    const wide = useWide();
+    const [ref, setRef] = useState({ ano: now.getFullYear(), mes: now.getMonth() });
+    const [sel, setSel] = useState(fmt(now));
+    const todayStr = fmt(now);
+    const first = new Date(ref.ano, ref.mes, 1);
+    const gridStart = new Date(ref.ano, ref.mes, 1 - ((first.getDay() + 6) % 7));
+    const nWeeks = Math.ceil((((first.getDay() + 6) % 7) + new Date(ref.ano, ref.mes + 1, 0).getDate()) / 7);
+    const cells = Array.from({ length: nWeeks * 7 }, (_, k) => new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + k));
+    const shift = (n) => { const d = new Date(ref.ano, ref.mes + n, 1); setRef({ ano: d.getFullYear(), mes: d.getMonth() }); };
+    const lessons = (d) => lessonsOn(d, alunos, eventos);
+    const selDate = parse(sel), selLs = lessons(selDate);
+    const monthTotal = cells.filter((d) => d.getMonth() === ref.mes).reduce((t, d) => t + lessons(d).filter((l) => !l.cancelada).length, 0);
+    return div({ style: { display: 'flex', flexDirection: 'column', gap: '14px' } },
+      div({ className: 'toolbar' },
+        button({ className: 'icon-btn', onClick: () => shift(-1), 'aria-label': 'Mês anterior' }, '‹'),
+        button({ className: 'icon-btn', onClick: () => shift(1), 'aria-label': 'Próximo mês' }, '›'),
+        button({ className: 'btn', onClick: () => { setRef({ ano: now.getFullYear(), mes: now.getMonth() }); setSel(todayStr); } }, 'Hoje'),
+        div({ className: 'grow' }, div({ className: 'range' }, cap(MESES[ref.mes]) + ' de ' + ref.ano), span({ className: 'muted tnum' }, monthTotal + (monthTotal === 1 ? ' aula' : ' aulas') + ' no mês')),
+        button({ className: 'btn primary', onClick: () => p.onSlot(selDate, '14:00') }, '+ Marcar aula')),
+      div({ className: 'mg' },
+        ORDEM.map((d) => div({ key: 'h' + d, className: 'mg-h' }, DIAS_CURTO[d])),
+        cells.map((d) => {
+          const ds = fmt(d), ls = lessons(d), out = d.getMonth() !== ref.mes, shown = wide ? ls.slice(0, 3) : [];
+          return div({ key: ds, className: 'mg-c' + (out ? ' out' : '') + (ds === todayStr ? ' today' : '') + (ds === sel ? ' sel' : ''), role: 'button', tabIndex: 0, 'aria-label': longDate(d) + ', ' + ls.length + ' aulas',
+            onClick: () => setSel(ds), onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSel(ds); } } },
+            div({ className: 'mg-n tnum' }, d.getDate()),
+            shown.map((l) => button({ key: l.key, className: 'mg-p' + (l.cancelada ? ' cancelled' : ''), style: { '--c': colorVar(l.aluno) }, onClick: (e) => { e.stopPropagation(); p.onOpen(l, d); } }, span({ className: 'tnum' }, l.hora), ' ', l.aluno.nome.split(' ')[0])),
+            wide && ls.length > 3 ? div({ className: 'mg-more' }, '+' + (ls.length - 3) + ' mais') : null,
+            !wide && ls.length ? div({ className: 'dots', style: { justifyContent: 'center' } }, ls.slice(0, 4).map((l) => i_({ key: l.key, style: { '--c': colorVar(l.aluno) } }))) : null);
+        })),
+      div({ className: 'range', style: { fontSize: '18px' } }, cap(longDate(selDate))),
+      selLs.length === 0 ? div({ className: 'note' }, 'Sem aulas neste dia.') :
+        div({ className: 'dlist' }, selLs.map((l) => button({ key: l.key, className: 'lcard' + (l.cancelada ? ' cancelled' : ''), style: { '--c': colorVar(l.aluno) }, onClick: () => p.onOpen(l, selDate) },
+          div({ className: 't' }, l.hora),
+          div({ style: { minWidth: 0 } }, div({ className: 'n' }, l.aluno.nome), div({ className: 'm' }, l.dur + ' min' + (l.aluno.modalidade ? ' · ' + l.aluno.modalidade : '') + (l.aluno.nivel ? ' · ' + l.aluno.nivel : ''))),
+          tagEl(l)))));
+  }
+
   function SemanaView(p) {
+    const [modo, setModo] = useState(() => { try { return localStorage.getItem('agenda-modo') === 'mes' ? 'mes' : 'semana'; } catch (e) { return 'semana'; } });
+    const pick = (m) => { setModo(m); try { localStorage.setItem('agenda-modo', m); } catch (e) {} };
+    return div({ style: { display: 'flex', flexDirection: 'column', gap: '14px' } },
+      div({ className: 'chips' }, [['semana', 'Semana'], ['mes', 'Mês']].map((x) => button({ key: x[0], className: 'chip', 'aria-pressed': modo === x[0], onClick: () => pick(x[0]) }, x[1]))),
+      modo === 'mes' ? h(MonthGrid, p) : h(WeekView, p));
+  }
+
+  function WeekView(p) {
     const { alunos, eventos, now } = p;
     const wide = useWide();
     const [base, setBase] = useState(new Date());
@@ -637,13 +763,22 @@ textarea.ctl { resize: vertical; min-height: 84px; }
     const [q, setQ] = useState('');
     const [st, setSt] = useState('ativos');
     const [nv, setNv] = useState('');
+    const [ord, setOrd] = useState('nome');
     const niveisUsados = NIVEIS.filter((n) => p.alunos.some((a) => a.nivel === n[0]));
     const list = p.alunos.filter((a) => {
       if (st === 'ativos' && a.ativo === false) return false;
       if (st === 'inativos' && a.ativo !== false) return false;
       if (nv && a.nivel !== nv) return false;
       return !q || (a.nome || '').toLowerCase().includes(q.toLowerCase());
-    }).sort(byName);
+    }).sort((a, c) => {
+      if (ord === 'nivel') return NIVEIS.findIndex((n) => n[0] === a.nivel) - NIVEIS.findIndex((n) => n[0] === c.nivel) || byName(a, c);
+      if (ord === 'proxima') {
+        const x = nextLessonOf(a, p.eventos, p.now), y = nextLessonOf(c, p.eventos, p.now);
+        const kx = x ? x.d.getTime() + mins(x.l.hora) * 60000 : Infinity, ky = y ? y.d.getTime() + mins(y.l.hora) * 60000 : Infinity;
+        return kx === ky ? byName(a, c) : kx - ky;
+      }
+      return byName(a, c);
+    });
     const nInativos = p.alunos.filter((a) => a.ativo === false).length;
     return div({ style: { display: 'flex', flexDirection: 'column', gap: '14px' } },
       div({ className: 'toolbar' },
@@ -651,6 +786,7 @@ textarea.ctl { resize: vertical; min-height: 84px; }
         div({ className: 'chips' },
           [['ativos', 'Ativos'], ['todos', 'Todos']].concat(nInativos ? [['inativos', 'Inativos (' + nInativos + ')']] : []).map((x) => button({ key: x[0], className: 'chip', 'aria-pressed': st === x[0], onClick: () => setSt(x[0]) }, x[1]))),
         div({ className: 'grow' }),
+        select({ className: 'ctl', style: { width: 'auto' }, 'aria-label': 'Ordenar alunos', value: ord, onChange: (e) => setOrd(e.target.value) }, option({ value: 'nome' }, 'Ordem alfabética'), option({ value: 'proxima' }, 'Próxima aula'), option({ value: 'nivel' }, 'Nível')),
         button({ className: 'btn primary', onClick: p.onNew }, '+ Novo aluno')),
       niveisUsados.length > 1 ? div({ className: 'chips' },
         button({ className: 'chip', 'aria-pressed': nv === '', onClick: () => setNv('') }, 'Todos os níveis'),
@@ -782,7 +918,7 @@ textarea.ctl { resize: vertical; min-height: 84px; }
     return h(Overlay, { onClose: p.onClose, label: 'Aula de ' + a.nome },
       div({ className: 'ph' }, h(Avatar, { a, size: 44 }), h2(null, a.nome), button({ className: 'icon-btn', onClick: p.onClose, 'aria-label': 'Fechar' }, '×')),
       div({ className: 'pb' },
-        div({ className: 'chips' }, l.cancelada ? span({ className: 'tag bad' }, 'Cancelada') : l.kind === 'reposicao' ? span({ className: 'tag warn' }, 'Reposição') : l.kind === 'extra' ? span({ className: 'tag ok' }, 'Aula extra') : span({ className: 'tag' }, 'Aula fixa'), a.nivel ? span({ className: 'tag' }, a.nivel) : null),
+        div({ className: 'chips' }, (tagEl(l, true) || span({ className: 'tag' }, 'Aula fixa')), a.nivel ? span({ className: 'tag' }, a.nivel) : null),
         dl({ className: 'kv' },
           dt(null, 'Quando'), dd({ className: 'tnum' }, cap(longDate(d)) + ', ' + l.hora + ' às ' + fim + ' (' + l.dur + ' min)'),
           a.modalidade ? [dt({ key: 'm1' }, 'Modalidade'), dd({ key: 'm2' }, [a.modalidade, a.formato].filter(Boolean).join(' · '))] : null,
@@ -791,7 +927,7 @@ textarea.ctl { resize: vertical; min-height: 84px; }
           a.licao ? [dt({ key: 'h1' }, 'Lição de casa'), dd({ key: 'h2' }, a.licao)] : null,
           l.nota ? [dt({ key: 'n1' }, 'Observação'), dd({ key: 'n2' }, l.nota)] : null)),
       div({ className: 'pf' },
-        button({ className: 'btn', onClick: () => p.onFicha(a.id) }, 'Abrir ficha do aluno'),
+        a.experimental ? button({ className: 'btn accent', onClick: () => p.onConvert(a) }, 'Cadastrar como aluno') : button({ className: 'btn', onClick: () => p.onFicha(a.id) }, 'Abrir ficha do aluno'),
         div({ className: 'right' },
           l.kind === 'regular' && !l.cancelada ? button({ className: 'btn', onClick: () => p.onRemarcar(l, d) }, 'Remarcar') : null,
           l.kind === 'regular' && l.cancelada ? button({ className: 'btn', onClick: () => p.onRemarcar(l, d) }, 'Marcar reposição') : null,
@@ -802,33 +938,54 @@ textarea.ctl { resize: vertical; min-height: 84px; }
   }
 
   /* ---------- Marcar aula (reposição / extra / remarcar) ---------- */
+  const TIPOS = [['reposicao', 'Reposição'], ['extra', 'Aula extra'], ['experimental', 'Aula experimental']];
   function AulaModal(p) {
     const ativos = p.alunos.filter((a) => a.ativo !== false).sort(byName);
     const ev = p.evento, pre = p.pre || {};
-    const [f, setF] = useState(() => ev ? { alunoId: ev.alunoId, tipo: ev.tipo, data: ev.data, hora: ev.hora || '14:00', dur: Number(ev.dur) || 60, nota: ev.nota || '' }
-      : { alunoId: pre.alunoId || (ativos[0] ? ativos[0].id : ''), tipo: pre.tipo || 'reposicao', data: pre.data || fmt(new Date()), hora: pre.hora || '14:00', dur: pre.dur || 60, nota: pre.nota || '' });
+    const [f, setF] = useState(() => ev
+      ? { alunoId: ev.alunoId || '', tipo: ev.tipo, data: ev.data, hora: ev.hora || '14:00', dur: Number(ev.dur) || 60, nota: ev.nota || '', nome: ev.nome || '', telefone: ev.telefone || '', modalidade: ev.modalidade || 'Presencial', local: ev.local || '' }
+      : { alunoId: pre.alunoId || (ativos[0] ? ativos[0].id : ''), tipo: pre.tipo || 'reposicao', data: pre.data || fmt(new Date()), hora: pre.hora || '14:00', dur: pre.dur || 60, nota: pre.nota || '', nome: '', telefone: '', modalidade: 'Presencial', local: '' });
     const [cancelOrig, setCancelOrig] = useState(!!pre.cancelOrig);
     const [erro, setErro] = useState('');
     const set = (k, v) => setF((o) => Object.assign({}, o, { [k]: v }));
+    const exp = f.tipo === 'experimental';
     const submit = () => {
-      if (!f.alunoId) { setErro('Escolha o aluno.'); return; }
+      if (exp && !f.nome.trim()) { setErro('Informe o nome de quem vai fazer a aula experimental.'); return; }
+      if (!exp && !f.alunoId) { setErro('Escolha o aluno.'); return; }
       if (!f.data || !f.hora) { setErro('Informe a data e o horário.'); return; }
-      p.onSave({ alunoId: f.alunoId, tipo: f.tipo, data: f.data, hora: f.hora, dur: Number(f.dur) || 60, nota: f.nota.trim() }, { id: ev ? ev.id : null, cancelOrig: cancelOrig ? pre.cancelOrig : null });
+      const base = { tipo: f.tipo, data: f.data, hora: f.hora, dur: Number(f.dur) || 60, nota: f.nota.trim() };
+      const obj = exp ? Object.assign(base, { alunoId: '', nome: f.nome.trim(), telefone: f.telefone.trim(), modalidade: f.modalidade, local: f.local.trim() }) : Object.assign(base, { alunoId: f.alunoId });
+      p.onSave(obj, { id: ev ? ev.id : null, cancelOrig: cancelOrig ? pre.cancelOrig : null });
     };
-    return h(Overlay, { onClose: p.onClose, label: ev ? 'Editar aula' : 'Marcar aula' },
-      div({ className: 'ph' }, h2(null, ev ? 'Editar aula' : pre.cancelOrig ? 'Remarcar aula' : 'Marcar aula'), button({ className: 'icon-btn', onClick: p.onClose, 'aria-label': 'Fechar' }, '×')),
+    const hoje = new Date(), amanha = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1);
+    const titulo = ev ? 'Editar aula' : pre.cancelOrig ? 'Remarcar aula' : 'Marcar aula';
+    return h(Overlay, { onClose: p.onClose, label: titulo },
+      div({ className: 'ph' }, h2(null, titulo), button({ className: 'icon-btn', onClick: p.onClose, 'aria-label': 'Fechar' }, '×')),
       div({ className: 'pb' },
-        ativos.length === 0 ? div({ className: 'banner' }, 'Cadastre um aluno ativo antes de marcar uma aula.') : null,
-        h(Field, { id: 'r-aluno', label: 'Aluno' }, select({ id: 'r-aluno', className: 'ctl', value: f.alunoId, onChange: (e) => set('alunoId', e.target.value) }, ativos.map((a) => option({ key: a.id, value: a.id }, a.nome)))),
+        div({ className: 'field' }, span({ className: 'lbl' }, 'Tipo de aula'), div({ className: 'chips' }, TIPOS.map((x) => button({ key: x[0], className: 'chip', 'aria-pressed': f.tipo === x[0], onClick: () => set('tipo', x[0]) }, x[1])))),
+        exp ? [
+          div({ key: 'e0', className: 'banner', style: { background: 'var(--accent-soft)', color: 'var(--accent)' } }, 'Para quem ainda não é aluno. A aula aparece na agenda, mas não entra nas contas do mês.'),
+          div({ key: 'e1', className: 'form2' },
+            h(Field, { id: 'x-nome', label: 'Nome do interessado *', full: true }, input({ id: 'x-nome', className: 'ctl', value: f.nome, autoFocus: true, onChange: (e) => set('nome', e.target.value) })),
+            h(Field, { id: 'x-tel', label: 'Telefone / WhatsApp' }, input({ id: 'x-tel', className: 'ctl', type: 'tel', value: f.telefone, onChange: (e) => set('telefone', e.target.value) })),
+            h(Field, { id: 'x-mod', label: 'Modalidade' }, select({ id: 'x-mod', className: 'ctl', value: f.modalidade, onChange: (e) => set('modalidade', e.target.value) }, ['Presencial', 'Online'].map((x) => option({ key: x, value: x }, x)))),
+            h(Field, { id: 'x-local', label: 'Local ou link', full: true }, input({ id: 'x-local', className: 'ctl', value: f.local, onChange: (e) => set('local', e.target.value) })))
+        ] : [
+          ativos.length === 0 ? div({ key: 'a0', className: 'banner' }, 'Cadastre um aluno ativo antes de marcar uma aula.') : null,
+          h(Field, { key: 'a1', id: 'r-aluno', label: 'Aluno' }, select({ id: 'r-aluno', className: 'ctl', value: f.alunoId, onChange: (e) => set('alunoId', e.target.value) }, ativos.map((a) => option({ key: a.id, value: a.id }, a.nome))))
+        ],
+        div({ className: 'field' }, span({ className: 'lbl' }, 'Dia'), div({ className: 'chips' },
+          button({ className: 'chip', 'aria-pressed': f.data === fmt(hoje), onClick: () => set('data', fmt(hoje)) }, 'Hoje'),
+          button({ className: 'chip', 'aria-pressed': f.data === fmt(amanha), onClick: () => set('data', fmt(amanha)) }, 'Amanhã'))),
         div({ className: 'form2' },
-          h(Field, { id: 'r-tipo', label: 'Tipo' }, select({ id: 'r-tipo', className: 'ctl', value: f.tipo, onChange: (e) => set('tipo', e.target.value) }, option({ value: 'reposicao' }, 'Reposição'), option({ value: 'extra' }, 'Aula extra'))),
-          h(Field, { id: 'r-dur', label: 'Duração' }, select({ id: 'r-dur', className: 'ctl', value: f.dur, onChange: (e) => set('dur', Number(e.target.value)) }, DURACOES.map((x) => option({ key: x, value: x }, x + ' min')))),
           h(Field, { id: 'r-data', label: 'Data' }, input({ id: 'r-data', className: 'ctl', type: 'date', value: f.data, onChange: (e) => set('data', e.target.value) })),
-          h(Field, { id: 'r-hora', label: 'Horário' }, input({ id: 'r-hora', className: 'ctl', type: 'time', value: f.hora, onChange: (e) => set('hora', e.target.value) }))),
-        h(Field, { id: 'r-nota', label: 'Observação', hint: 'Opcional. Ex.: repõe a aula de segunda' }, input({ id: 'r-nota', className: 'ctl', value: f.nota, onChange: (e) => set('nota', e.target.value) })),
+          h(Field, { id: 'r-hora', label: 'Horário' }, input({ id: 'r-hora', className: 'ctl', type: 'time', value: f.hora, onChange: (e) => set('hora', e.target.value) })),
+          h(Field, { id: 'r-dur', label: 'Duração' }, select({ id: 'r-dur', className: 'ctl', value: f.dur, onChange: (e) => set('dur', Number(e.target.value)) }, DURACOES.map((x) => option({ key: x, value: x }, x + ' min')))),
+          h(Field, { id: 'r-nota', label: 'Observação', hint: 'Opcional' }, input({ id: 'r-nota', className: 'ctl', value: f.nota, onChange: (e) => set('nota', e.target.value) }))),
+        f.data ? div({ className: 'note' }, cap(longDate(parse(f.data))) + (f.hora ? ', ' + f.hora + ' às ' + hm(mins(f.hora) + (Number(f.dur) || 60)) : '')) : null,
         pre.cancelOrig ? label({ className: 'check' }, input({ type: 'checkbox', checked: cancelOrig, onChange: (e) => setCancelOrig(e.target.checked) }), 'Cancelar a aula original (' + shortDate(pre.cancelOrig.ds) + ', ' + pre.cancelOrig.hora + ')') : null,
         erro ? div({ className: 'banner bad', role: 'alert' }, erro) : null),
-      div({ className: 'pf' }, span(null), div({ className: 'right' }, button({ className: 'btn', onClick: p.onClose }, 'Cancelar'), button({ className: 'btn primary', onClick: submit, disabled: ativos.length === 0 }, ev ? 'Salvar' : 'Marcar aula'))));
+      div({ className: 'pf' }, span(null), div({ className: 'right' }, button({ className: 'btn', onClick: p.onClose }, 'Cancelar'), button({ className: 'btn primary', onClick: submit, disabled: !exp && ativos.length === 0 }, ev ? 'Salvar' : 'Marcar aula'))));
   }
 
   /* ---------- Ficha / cadastro do aluno ---------- */
@@ -842,7 +999,7 @@ textarea.ctl { resize: vertical; min-height: 84px; }
   function AlunoDrawer(p) {
     const a = p.aluno;
     const [f, setF] = useState(() => {
-      if (!a) return NOVO();
+      if (!a) return Object.assign(NOVO(), p.prefill || {});
       const n = NOVO();
       Object.keys(n).forEach((k) => { if (a[k] !== undefined && a[k] !== null) n[k] = a[k]; });
       n.telefone = a.telefone || a.contato || '';
@@ -935,7 +1092,7 @@ textarea.ctl { resize: vertical; min-height: 84px; }
       body = [
         div({ key: 'e', className: 'field' }, span({ className: 'sect' }, 'Reposições, extras e cancelamentos'),
           evs.length === 0 ? span({ className: 'hint' }, 'Nada registrado ainda.') : div({ className: 'evlist' }, evs.map((e) => div({ key: e.id, className: 'ev' },
-            span({ className: 'tnum' }, shortDate(e.data) + (e.hora ? ' · ' + e.hora : '') + ' — ' + (e.tipo === 'reposicao' ? 'Reposição' : e.tipo === 'extra' ? 'Aula extra' : 'Aula cancelada') + (e.nota ? ' (' + e.nota + ')' : '')),
+            span({ className: 'tnum' }, shortDate(e.data) + (e.hora ? ' · ' + e.hora : '') + ' — ' + (e.tipo === 'reposicao' ? 'Reposição' : e.tipo === 'extra' ? 'Aula extra' : e.tipo === 'experimental' ? 'Aula experimental' : 'Aula cancelada') + (e.nota ? ' (' + e.nota + ')' : '')),
             button({ className: 'btn small ghost', onClick: () => p.onRemoveEvento(e) }, 'Remover'))))),
         div({ key: 'p', className: 'field' }, span({ className: 'sect' }, 'Pagamentos registrados'),
           pags.length === 0 ? span({ className: 'hint' }, 'Nenhum pagamento marcado ainda.') : div({ className: 'evlist' }, pags.map((x) => div({ key: x.id, className: 'ev' },
@@ -972,6 +1129,7 @@ textarea.ctl { resize: vertical; min-height: 84px; }
     const [tab, setTab] = useState(tabFromHash);
     const [editing, setEditing] = useState(null);
     const [aula, setAula] = useState(null);
+    const [prefill, setPrefill] = useState(null);
     const [sheet, setSheet] = useState(null);
     const [toast, setToast] = useState('');
     const tRef = useRef(null);
@@ -980,7 +1138,7 @@ textarea.ctl { resize: vertical; min-height: 84px; }
     const notify = (m) => { setToast(m); clearTimeout(tRef.current); tRef.current = setTimeout(() => setToast(''), 2800); };
     const act = (fn, ok) => Promise.resolve().then(fn).then(() => { if (ok) notify(ok); }).catch(() => notify('Não foi possível salvar. Tente de novo.'));
 
-    const saveAluno = (id, obj) => { act(() => store.save('alunos', id, obj), 'Aluno salvo'); setEditing(null); };
+    const saveAluno = (id, obj) => { act(() => store.save('alunos', id, obj), 'Aluno salvo'); setEditing(null); setPrefill(null); };
     const deleteAluno = (a) => {
       act(() => {
         const ps = [store.remove('alunos', a.id)];
@@ -995,7 +1153,7 @@ textarea.ctl { resize: vertical; min-height: 84px; }
         const ps = [store.save('eventos', opts.id || uid(), obj)];
         if (opts.cancelOrig) { const c = opts.cancelOrig; ps.push(store.save('eventos', cancelId(obj.alunoId, c.ds, c.hora), { alunoId: obj.alunoId, tipo: 'cancelada', data: c.ds, hora: c.hora, nota: '' })); }
         return Promise.all(ps);
-      }, opts.id ? 'Aula atualizada' : obj.tipo === 'extra' ? 'Aula extra marcada' : 'Reposição marcada');
+      }, opts.id ? 'Aula atualizada' : obj.tipo === 'extra' ? 'Aula extra marcada' : obj.tipo === 'experimental' ? 'Aula experimental marcada' : 'Reposição marcada');
       setAula(null);
     };
     const removeEvento = (e) => { act(() => store.remove('eventos', e.id), 'Removido'); setSheet(null); };
@@ -1059,11 +1217,13 @@ textarea.ctl { resize: vertical; min-height: 84px; }
         h(ThemeToggle)),
       store.loaded ? h(Hero, { alunos: data.alunos, eventos: data.eventos, pagamentos: data.pagamentos, now, goTab }) : null,
       store.status === 'error' ? div({ className: 'banner bad', role: 'alert' }, 'Não foi possível acessar o armazenamento. Suas alterações podem não ser salvas.') : null,
+      store.legacy ? div({ className: 'banner' }, span(null, 'Encontrei ' + store.legacy.alunos.length + (store.legacy.alunos.length === 1 ? ' aluno salvo' : ' alunos salvos') + ' neste navegador. Quer trazer para a sua conta?'),
+        div({ style: { display: 'flex', gap: '8px' } }, button({ className: 'btn small primary', onClick: () => act(() => store.importLegacy(), 'Alunos importados') }, 'Importar agora'), button({ className: 'btn small', onClick: store.dismissLegacy }, 'Agora não'))) : null,
       temExemplos ? div({ className: 'banner' }, span(null, 'Você está vendo dados de exemplo.'), button({ className: 'btn small', onClick: clearExamples }, 'Apagar exemplos')) : null,
       div({ className: 'view', key: tab + (store.loaded ? 'l' : 'x') }, body),
       div({ className: 'foot' }, store.status === 'cloud' ? 'Seus dados ficam salvos na sua conta e aparecem em qualquer aparelho.' : store.status === 'local' ? 'Seus dados ficam salvos só neste navegador. Se você limpar os dados do site, eles somem.' : ''),
-      editing ? h(AlunoDrawer, { key: editing, aluno: editAluno, eventos: data.eventos, pagamentos: data.pagamentos, onSave: saveAluno, onDelete: deleteAluno, onRemoveEvento: (e) => act(() => store.remove('eventos', e.id), 'Removido'), onClose: () => setEditing(null) }) : null,
-      sheet ? h(LessonSheet, { l: sheet.l, d: sheet.d, notify, onClose: () => setSheet(null), onFicha: (id) => { setSheet(null); setEditing(id); }, onCancel: cancelLesson, onUndoCancel: (e) => { removeEvento(e); }, onRemoveEvento: removeEvento, onRemarcar: remarcar, onEditEvento: (e) => { setSheet(null); setAula({ evento: e }); } }) : null,
+      editing ? h(AlunoDrawer, { key: editing, prefill: editing === 'new' ? prefill : null, aluno: editAluno, eventos: data.eventos, pagamentos: data.pagamentos, onSave: saveAluno, onDelete: deleteAluno, onRemoveEvento: (e) => act(() => store.remove('eventos', e.id), 'Removido'), onClose: () => { setEditing(null); setPrefill(null); } }) : null,
+      sheet ? h(LessonSheet, { l: sheet.l, d: sheet.d, notify, onClose: () => setSheet(null), onFicha: (id) => { setSheet(null); setEditing(id); }, onConvert: (a) => { setSheet(null); setPrefill({ nome: a.nome, telefone: a.telefone || '', modalidade: a.modalidade || 'Presencial', local: a.local || '' }); setEditing('new'); }, onCancel: cancelLesson, onUndoCancel: (e) => { removeEvento(e); }, onRemoveEvento: removeEvento, onRemarcar: remarcar, onEditEvento: (e) => { setSheet(null); setAula({ evento: e }); } }) : null,
       aula ? h(AulaModal, { key: JSON.stringify(aula).length + (aula.evento ? aula.evento.id : ''), alunos: data.alunos, pre: aula.pre, evento: aula.evento, onSave: saveAula, onClose: () => setAula(null) }) : null,
       toast ? div({ className: 'toast', role: 'status' }, toast) : null);
   }
